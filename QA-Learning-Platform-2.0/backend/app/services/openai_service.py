@@ -6,8 +6,13 @@ from datetime import datetime
 
 class OpenAIService:
     def __init__(self):
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        self.client = OpenAI(api_key=api_key)
         self.assistant_id = os.getenv("ASSISTANT_ID")
+        if not self.assistant_id:
+            raise ValueError("ASSISTANT_ID environment variable is not set")
 
     def create_thread(self, initial_messages: Optional[List[Dict[str, Any]]] = None) -> str:
         """Create a new thread, optionally with initial messages"""
@@ -71,7 +76,7 @@ class OpenAIService:
             if message.role == "assistant":
                 # Get the text content
                 for content in message.content:
-                    if content.type == "text":
+                    if hasattr(content, 'text') and content.type == "text":
                         return content.text.value
         return None
 

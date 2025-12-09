@@ -39,52 +39,60 @@ async def delete_session(session_id: str):
 @router.post("/chat", response_model=SendMessageResponse)
 async def send_message(request: SendMessageRequest, background_tasks: BackgroundTasks):
     """Send a message and get assistant response"""
-    session_id = request.session_id
+    try:
+        session_id = request.session_id
 
-    # Create new session if not provided
-    if not session_id:
-        session = session_service.create_session()
-        session_id = session.id
-    else:
-        session = session_service.get_session(session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
+        # Create new session if not provided
+        if not session_id:
+            session = session_service.create_session()
+            session_id = session.id
+        else:
+            session = session_service.get_session(session_id)
+            if not session:
+                raise HTTPException(status_code=404, detail="Session not found")
 
-    # Add user message to session
-    user_message = Message(
-        role="user",
-        content=request.message,
-        timestamp=datetime.now()
-    )
-    session_service.add_message_to_session(session_id, user_message)
+        # Add user message to session
+        user_message = Message(
+            role="user",
+            content=request.message,
+            timestamp=datetime.now()
+        )
+        session_service.add_message_to_session(session_id, user_message)
 
-    # Send message to OpenAI thread
-    openai_service.send_message(session.thread_id, request.message)
+        # Send message to OpenAI thread
+        openai_service.send_message(session.thread_id, request.message)
 
-    # Create and run the assistant
-    run_id = openai_service.create_and_run(session.thread_id)
+        # Create and run the assistant
+        run_id = openai_service.create_and_run(session.thread_id)
 
-    # Wait for completion (in production, this should be async)
-    if openai_service.wait_for_run_completion(session.thread_id, run_id):
-        # Get assistant response
-        assistant_content = openai_service.get_assistant_response(session.thread_id)
+        # Wait for completion (in production, this should be async)
+        if openai_service.wait_for_run_completion(session.thread_id, run_id):
+            # Get assistant response
+            assistant_content = openai_service.get_assistant_response(session.thread_id)
 
-        if assistant_content:
-            assistant_message = Message(
-                role="assistant",
-                content=assistant_content,
-                timestamp=datetime.now()
-            )
-            session_service.add_message_to_session(session_id, assistant_message)
+            if assistant_content:
+                assistant_message = Message(
+                    role="assistant",
+                    content=assistant_content,
+                    timestamp=datetime.now()
+                )
+                session_service.add_message_to_session(session_id, assistant_message)
 
-            return SendMessageResponse(
-                session_id=session_id,
-                message=user_message,
-                assistant_response=assistant_message
-            )
+                return SendMessageResponse(
+                    session_id=session_id,
+                    message=user_message,
+                    assistant_response=assistant_message
+                )
 
-    # If we get here, something went wrong
-    raise HTTPException(status_code=500, detail="Failed to get assistant response")
+        # If we get here, something went wrong
+        raise HTTPException(status_code=500, detail="Failed to get assistant response")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in send_message: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 @router.get("/sessions/{session_id}/messages")
 async def get_session_messages(session_id: str):
