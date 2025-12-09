@@ -57,3 +57,10 @@ externalPort = 8000
 [[ports]]
 localPort = 33057
 externalPort = 3000
+
+[userenv]
+
+[userenv.shared]
+ASSISTANT_ID = "asst_IcpO9ppRx9Ug4IQeTcIk7ypN"
+GOOGLE_CLIENT_ID = "865963080031-mg5f5k6cirk7oidsocq0up59jvhocu5h.apps.googleusercontent.com"
+OAUTH_REDIRECT_URI = "http://localhost:8000/api/v1/auth/callback"
