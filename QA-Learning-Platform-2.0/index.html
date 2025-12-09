@@ -12,33 +12,106 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --color-bg-light: #FAF9F6;
+        --color-bg-dark: #1A1816;
+        --color-text-primary-light: #2B2826;
+        --color-text-primary-dark: #F5F3F0;
+        --color-text-secondary-light: #6B6662;
+        --color-text-secondary-dark: #A8A29E;
+        --color-accent: #D4A574;
+        --color-accent-dark: #8B7355;
+        --color-border-light: #E8E6E1;
+        --color-border-dark: #2F2D2B;
+        --color-surface-light: #FFFFFF;
+        --color-surface-dark: #1F1D1B;
+      }
+
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
-      /* Custom scrollbar for webkit */
+
+      .font-serif {
+        font-family: 'Crimson Pro', Georgia, serif;
+      }
+
+      .font-mono {
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+      }
+
+      /* Custom scrollbar */
       ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 8px;
+        height: 8px;
       }
       ::-webkit-scrollbar-track {
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #e5e7eb;
-        border-radius: 3px;
+        background: var(--color-border-light);
+        border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #d1d5db;
+        background: var(--color-accent);
       }
       .dark ::-webkit-scrollbar-thumb {
-        background: #374151;
+        background: var(--color-border-dark);
       }
       .dark ::-webkit-scrollbar-thumb:hover {
-        background: #4b5563;
+        background: var(--color-accent-dark);
+      }
+
+      /* Smooth fade-in animation */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes shimmer {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+
+      .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out forwards;
+      }
+
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+      }
+
+      .animate-shimmer {
+        animation: shimmer 1.6s ease-in-out infinite;
+      }
+
+      /* Smooth theme transition */
+      * {
+        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* Custom message cursor */
+      .typing-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1em;
+        background-color: currentColor;
+        margin-left: 2px;
+        animation: shimmer 1s ease-in-out infinite;
       }
     </style>
   <script type="importmap">

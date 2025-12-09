@@ -93,8 +93,8 @@ const App: React.FC = () => {
 
   if (auth.isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-gray-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-900 dark:border-gray-100 border-t-transparent" />
+      <div className="flex h-screen w-full items-center justify-center bg-[#FAF9F6] dark:bg-[#1A1816]">
+        <div className="h-10 w-10 animate-shimmer rounded-full border-2 border-[#D4A574]" />
       </div>
     );
   }

@@ -179,7 +179,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   };
 
   return (
-    <div className="flex h-screen w-full bg-white dark:bg-gray-950 transition-colors duration-200">
+    <div className="flex h-screen w-full bg-[#FAF9F6] dark:bg-[#1A1816] transition-colors duration-200">
       <ChatHistorySidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -189,14 +189,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       />
       <div className="flex flex-col flex-1">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 px-4 backdrop-blur-md">
+      <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FAF9F6]/90 dark:bg-[#1A1816]/90 px-6 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsSidebarOpen(true)}
             title="Chat History"
-            className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 md:inline-flex hidden"
+            className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] md:inline-flex hidden transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12h18"/>
@@ -204,16 +204,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               <path d="M3 18h18"/>
             </svg>
           </Button>
-          <span className="font-semibold text-gray-800 dark:text-gray-100">QA Learning Platform</span>
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+          <span className="font-serif font-semibold text-[#2B2826] dark:text-[#F5F3F0] text-lg tracking-wide">QA Learning Platform</span>
+          <span className={`rounded-full px-3 py-1 text-xs font-medium ${
             isConnected
-              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-              : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+              ? 'bg-[#D4A574]/10 text-[#8B7355] dark:bg-[#D4A574]/20 dark:text-[#D4A574]'
+              : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
           }`}>
             {isConnected ? 'Connected' : 'Disconnected'}
           </span>
           {getCurrentSessionId() && (
-            <span className="rounded-full bg-blue-100 dark:bg-blue-900 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300 font-medium">
+            <span className="rounded-full bg-[#D4A574]/10 dark:bg-[#D4A574]/20 px-3 py-1 text-xs text-[#8B7355] dark:text-[#D4A574] font-medium">
               Session Active
             </span>
           )}
@@ -227,7 +227,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                 onClick={() => window.location.reload()}
                 title="Refresh Page"
                 disabled={isTyping}
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
@@ -242,7 +242,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                 onClick={clearCurrentSession}
                 title="Delete Chat"
                 disabled={isTyping}
-                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50/50 dark:hover:bg-red-900/20 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 6h18"/>
@@ -268,7 +268,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
             size="sm"
             onClick={onToggleTheme}
             title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+            className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] transition-colors"
           >
             {isDarkMode ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -281,7 +281,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
             size="sm"
             onClick={onLogout}
             title="Sign out"
-            className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+            className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
           </Button>
@@ -289,32 +289,32 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
-        <div className="mx-auto max-w-3xl h-full flex flex-col">
+      <main className="flex-1 overflow-y-auto px-6 py-12 md:py-16 scroll-smooth">
+        <div className="mx-auto max-w-[720px] h-full flex flex-col">
           {messages.length === 0 ? (
             /* Empty State */
-            <div className="flex flex-1 flex-col items-center justify-center space-y-10 mt-[-50px]">
-               <div className="space-y-2 text-center">
-                 <h1 className="flex items-center justify-center gap-3 text-4xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 sm:text-5xl">
-
-                    <span className="bg-gradient-to-r from-gray-800 to-gray-500 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent pb-1">
+            <div className="flex flex-1 flex-col items-center justify-center space-y-12 animate-fade-in">
+               <div className="space-y-3 text-center">
+                 <h1 className="flex items-center justify-center gap-3 font-serif text-5xl font-semibold tracking-tight text-[#2B2826] dark:text-[#F5F3F0] sm:text-6xl">
+                    <span className="bg-gradient-to-br from-[#2B2826] via-[#6B6662] to-[#D4A574] dark:from-[#F5F3F0] dark:via-[#A8A29E] dark:to-[#D4A574] bg-clip-text text-transparent">
                       Hello, {user?.name?.split(' ')[0] || 'User'}
                     </span>
                  </h1>
-                 <h2 className="text-2xl text-gray-400 dark:text-gray-600 font-light">How can I help you today?</h2>
+                 <h2 className="text-2xl md:text-3xl text-[#6B6662] dark:text-[#A8A29E] font-light">How can I help you today?</h2>
                </div>
-               
-               <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:w-[700px]">
+
+               <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 max-w-[650px]">
                   {EXAMPLE_PROMPTS.map((prompt, index) => (
-                    <button 
+                    <button
                       key={index}
                       onClick={() => sendMessage(prompt.message)}
-                      className="group flex flex-col items-start justify-between rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 p-4 text-left transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                      className="group flex flex-col items-start gap-2 rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] p-5 text-left transition-all hover:border-[#D4A574] dark:hover:border-[#D4A574] hover:shadow-sm animate-fade-in-up opacity-0"
                     >
-                      <span className="font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                      <span className="font-medium text-[#2B2826] dark:text-[#F5F3F0] group-hover:text-[#D4A574] dark:group-hover:text-[#D4A574] transition-colors">
                         {prompt.heading}
                       </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-500">
+                      <span className="text-sm text-[#6B6662] dark:text-[#A8A29E]">
                         {prompt.subheading}
                       </span>
                     </button>
@@ -323,7 +323,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
             </div>
           ) : (
             /* Message List */
-            <div className="space-y-6 pb-24">
+            <div className="space-y-8 pb-32">
               {messages.map((msg) => (
                 <MessageBubble key={msg.id} message={msg} />
               ))}
@@ -334,9 +334,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       </main>
 
       {/* Input Area */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent dark:from-gray-950 dark:via-gray-950 pt-10 pb-6 px-4">
-        <div className="mx-auto max-w-3xl">
-          <div className="relative flex w-full items-end rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg shadow-gray-200/50 dark:shadow-none ring-offset-2 focus-within:ring-2 focus-within:ring-black/10 dark:focus-within:ring-white/10 transition-colors">
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent dark:from-[#1A1816] dark:via-[#1A1816] pt-12 pb-8 px-6">
+        <div className="mx-auto max-w-[720px]">
+          <div className="relative flex w-full items-end rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] shadow-lg shadow-black/5 dark:shadow-none ring-offset-2 focus-within:ring-2 focus-within:ring-[#D4A574]/20 dark:focus-within:ring-[#D4A574]/30 transition-all">
             <textarea
               ref={textareaRef}
               value={input}
@@ -344,18 +344,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               onKeyDown={handleKeyDown}
               placeholder="Ask about documents..."
               rows={1}
-              className="max-h-[200px] min-h-[52px] w-full resize-none bg-transparent px-4 py-3.5 text-base text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="max-h-[200px] min-h-[56px] w-full resize-none bg-transparent px-5 py-4 text-base text-[#2B2826] dark:text-[#F5F3F0] placeholder:text-[#6B6662] dark:placeholder:text-[#A8A29E] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               style={{ overflowY: input.length > 0 ? 'auto' : 'hidden' }}
               disabled={isTyping}
             />
-            <div className="pb-2 pr-2 flex gap-1">
+            <div className="pb-2.5 pr-2.5 flex gap-2">
               {isStreaming && (
                 <Button
                   size="icon"
                   variant="secondary"
                   onClick={handleStopStreaming}
                   title="Stop generating"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50/50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect width="4" height="16" x="6" y="4" rx="1"/>
@@ -368,25 +368,25 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                 variant={input.trim() ? "primary" : "ghost"}
                 disabled={!input.trim() || isTyping}
                 onClick={() => handleSubmit()}
-                className={!input.trim() ? "text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-transparent dark:hover:bg-transparent" : ""}
+                className={!input.trim() ? "text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent" : "bg-[#D4A574] hover:bg-[#8B7355] text-white"}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
               </Button>
             </div>
           </div>
-          <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-600">
+          <p className="mt-3 text-center text-xs text-[#6B6662] dark:text-[#A8A29E]">
             AI can make mistakes. Consider checking important information.
           </p>
         </div>
       </div>
 
       {/* Mobile Chat History Button */}
-      <div className="md:hidden fixed bottom-20 left-4 z-30">
+      <div className="md:hidden fixed bottom-24 left-6 z-30">
         <Button
           variant="primary"
           size="sm"
           onClick={() => setIsSidebarOpen(true)}
-          className="rounded-full shadow-lg"
+          className="rounded-full shadow-lg bg-[#D4A574] hover:bg-[#8B7355] text-white"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
