@@ -22,8 +22,24 @@ export const MOCK_USER = {
 export const DEV_BYPASS_KEY = 'DEV_BYPASS_AUTH';
 
 export const EXAMPLE_PROMPTS = [
-  { heading: 'Explain technical concepts', subheading: 'to a 5 year old', message: 'Explain quantum physics to a 5 year old.' },
-  { heading: 'Draft an email', subheading: 'requesting a deadline extension', message: 'Draft a polite email to my boss requesting a deadline extension for the Q3 project.' },
-  { heading: 'Suggest fun activities', subheading: 'for a rainy day', message: 'Suggest 5 fun indoor activities for a rainy day with friends.' },
-  { heading: 'Write a python script', subheading: 'to parse CSV data', message: 'Write a Python script to parse a CSV file and calculate the average of the "score" column.' }
+  { 
+    heading: 'นิยามการประมวลผลภาพ', 
+    subheading: 'และความสำคัญ', 
+    message: 'นิยามการประมวลผลข้อมูลภาพ หรือ การประมวลผลภาพ (Image Processing) หมายถึงอะไร และทำไมจึงต้องประมวลผลภาพ' 
+  },
+  { 
+    heading: 'การแปลงภาพ', 
+    subheading: 'Unitary และ Fourier', 
+    message: 'Unitary transform ต่างจาก Fourier transform อย่างไร ในบริบทของการประมวลผลภาพ' 
+  },
+  { 
+    heading: 'สถิติภาพ', 
+    subheading: 'ความแปรปรวนร่วม', 
+    message: 'อธิบายค่าความแปรปรวนร่วม (Covariance) และนำไปใช้ประโยชน์ในการประมวลผลภาพได้อย่างไร' 
+  },
+  { 
+    heading: 'ตัวกรองภาพ', 
+    subheading: 'Sharpen Filters', 
+    message: 'ตัวกรองปรับสว่าง (Sharpen Filters) มีวัตถุประสงค์อะไรบ้าง และยกตัวอย่างหน้ากากตัวกรองความถี่สูงแบบเชิงเส้น' 
+  }
 ];
