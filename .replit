@@ -67,4 +67,4 @@ deploymentTarget = "vm"
 run = ["bash", "-c", """
 cd /root/QA-Learning-Platform-2.0/backend && python -m gunicorn -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 app.main:app &
 cd /root/QA-Learning-Platform-2.0 && npx serve -s dist -p 5000"""]
-build = ["bash", "-c", "cd /root && npm --prefix QA-Learning-Platform-2.0 install && npm --prefix QA-Learning-Platform-2.0 run build && pip install -q gunicorn -t QA-Learning-Platform-2.0/backend"]
+build = ["bash", "-c", "cd /root/QA-Learning-Platform-2.0 && npm install && npm run build && pip install gunicorn"]
