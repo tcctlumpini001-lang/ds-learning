@@ -12,7 +12,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const handleGoogleLogin = () => {
     setIsLoggingIn(true);
     // Redirect browser to backend to start Google OAuth flow
-    window.location.href = 'http://localhost:8000/api/v1/auth/google';
+    window.location.href = '/api/v1/auth/google';
   };
 
   const handleDevBypass = () => {

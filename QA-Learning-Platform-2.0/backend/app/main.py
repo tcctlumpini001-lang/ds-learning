@@ -15,9 +15,20 @@ app = FastAPI(
 )
 
 # CORS middleware
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
+]
+# Add Replit domain if available
+replit_domain = os.getenv("REPLIT_DEV_DOMAIN")
+if replit_domain:
+    origins.append(f"https://{replit_domain}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Frontend URLs
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

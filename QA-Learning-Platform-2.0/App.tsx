@@ -30,7 +30,7 @@ const App: React.FC = () => {
       }
 
       try {
-        const resp = await fetch('http://localhost:8000/api/v1/auth/me', { credentials: 'include' });
+        const resp = await fetch('/api/v1/auth/me', { credentials: 'include' });
         if (resp.ok) {
           const data = await resp.json();
           if (data.user) {
@@ -78,7 +78,7 @@ const App: React.FC = () => {
   const handleLogout = () => {
     // Call backend to clear session cookie
     try {
-      fetch('http://localhost:8000/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+      fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
     } catch (err) {
       // ignore
     }
