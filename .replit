@@ -54,6 +54,10 @@ externalPort = 80
 localPort = 8000
 externalPort = 8000
 
+[[ports]]
+localPort = 37939
+externalPort = 3000
+
 [userenv]
 
 [userenv.shared]
@@ -64,8 +68,5 @@ FRONTEND_URL = "https://2b27fd39-5333-40bf-ace2-a1f8cd311787-00-2e1jq2dlxqd1u.pi
 
 [deployment]
 deploymentTarget = "vm"
-run = ["bash", "-c", """
-cd QA-Learning-Platform-2.0/backend && python run.py &
-sleep 2
-cd QA-Learning-Platform-2.0 && npx serve -s dist -l 5000"""]
+run = ["bash", "-c", "cd QA-Learning-Platform-2.0/backend && python -m gunicorn -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:5000 app.main:app"]
 build = ["bash", "-c", "cd QA-Learning-Platform-2.0 && npm install && npm run build && pip install gunicorn"]
