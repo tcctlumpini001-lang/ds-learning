@@ -48,9 +48,9 @@ const App: React.FC = () => {
     checkSession();
 
     // Check system preference for dark mode
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setIsDarkMode(true);
-    }
+    // if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    //   setIsDarkMode(true);
+    // }
   }, []);
 
   useEffect(() => {

@@ -204,7 +204,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               <path d="M3 18h18"/>
             </svg>
           </Button>
-          <span className="font-serif font-semibold text-[#2B2826] dark:text-[#F5F3F0] text-lg tracking-wide">QA Learning Platform</span>
+          <span className="font-serif font-semibold text-[#2B2826] dark:text-[#F5F3F0] text-lg tracking-wide">Learning Platform</span>
           <span className={`rounded-full px-3 py-1 text-xs font-medium ${
             isConnected
               ? 'bg-[#D4A574]/10 text-[#8B7355] dark:bg-[#D4A574]/20 dark:text-[#D4A574]'
