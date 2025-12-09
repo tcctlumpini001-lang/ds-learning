@@ -1,0 +1,10 @@
+{
+  "name": "ds-learning",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "cd QA-Learning-Platform-2.0 && npm install",
+    "build": "cd QA-Learning-Platform-2.0 && npm run build",
+    "start": "cd QA-Learning-Platform-2.0/backend && python run.py &\ncd QA-Learning-Platform-2.0 && npx serve -s dist -l 5000"
+  }
+}
