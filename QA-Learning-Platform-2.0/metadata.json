@@ -1,0 +1,5 @@
+{
+  "name": "Gemini-style Chat UI",
+  "description": "A high-fidelity chat interface featuring simulated Google SSO authentication and streaming text responses, designed with Vercel-inspired aesthetics.",
+  "requestFramePermissions": []
+}

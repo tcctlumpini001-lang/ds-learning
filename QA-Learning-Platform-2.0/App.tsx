@@ -1,0 +1,118 @@
+
+import React, { useState, useEffect } from 'react';
+import { AuthState, User } from './types';
+import { MOCK_USER, DEV_BYPASS_KEY } from './constants';
+import { LoginPage } from './components/LoginPage';
+import { ChatInterface } from './components/ChatInterface';
+
+const App: React.FC = () => {
+  const [auth, setAuth] = useState<AuthState>({
+    user: null,
+    isAuthenticated: false,
+    isLoading: true,
+  });
+
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Check for dev bypass or existing session (real backend)
+    const checkSession = async () => {
+      const bypass = sessionStorage.getItem(DEV_BYPASS_KEY);
+      const storedUser = sessionStorage.getItem('mock_user');
+
+      if (bypass === 'true' || storedUser) {
+        setAuth({
+          user: storedUser ? JSON.parse(storedUser) : MOCK_USER,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        return;
+      }
+
+      try {
+        const resp = await fetch('http://localhost:8000/api/v1/auth/me', { credentials: 'include' });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.user) {
+            setAuth({ user: data.user, isAuthenticated: true, isLoading: false });
+            return;
+          }
+        }
+      } catch (err) {
+        // ignore
+      }
+
+      setAuth(prev => ({ ...prev, isLoading: false }));
+    };
+
+    checkSession();
+
+    // Check system preference for dark mode
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  const handleLogin = () => {
+    // Persist mock session
+    sessionStorage.setItem('mock_user', JSON.stringify(MOCK_USER));
+    setAuth({
+      user: MOCK_USER,
+      isAuthenticated: true,
+      isLoading: false,
+    });
+  };
+
+  const handleLogout = () => {
+    // Call backend to clear session cookie
+    try {
+      fetch('http://localhost:8000/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch (err) {
+      // ignore
+    }
+    sessionStorage.removeItem('mock_user');
+    sessionStorage.removeItem(DEV_BYPASS_KEY);
+    setAuth({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+    });
+  };
+
+  if (auth.isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-gray-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-900 dark:border-gray-100 border-t-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {auth.isAuthenticated ? (
+        <ChatInterface 
+          user={auth.user}
+          onLogout={handleLogout} 
+          isDarkMode={isDarkMode}
+          onToggleTheme={toggleTheme}
+        />
+      ) : (
+        <LoginPage onLogin={handleLogin} />
+      )}
+    </>
+  );
+};
+
+export default App;
