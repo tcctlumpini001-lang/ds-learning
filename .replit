@@ -68,4 +68,4 @@ run = ["bash", "-c", """
 cd QA-Learning-Platform-2.0/backend && python run.py &
 sleep 2
 cd QA-Learning-Platform-2.0 && npx serve -s dist -l 5000"""]
-build = ["bash", "-c", "cd QA-Learning-Platform-2.0 && npm install && npm run build && cd backend && pip install gunicorn"]
+build = ["bash", "-c", "cd QA-Learning-Platform-2.0 && npm install && npm run build && pip install gunicorn"]
