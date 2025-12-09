@@ -61,3 +61,10 @@ ASSISTANT_ID = "asst_LgzuWTu2krrNvi4JxQojnLTJ"
 GOOGLE_CLIENT_ID = "865963080031-mg5f5k6cirk7oidsocq0up59jvhocu5h.apps.googleusercontent.com"
 OAUTH_REDIRECT_URI = "https://2b27fd39-5333-40bf-ace2-a1f8cd311787-00-2e1jq2dlxqd1u.pike.replit.dev/api/v1/auth/callback"
 FRONTEND_URL = "https://2b27fd39-5333-40bf-ace2-a1f8cd311787-00-2e1jq2dlxqd1u.pike.replit.dev"
+
+[deployment]
+deploymentTarget = "vm"
+run = ["bash", "-c", """
+cd QA-Learning-Platform-2.0/backend && python run.py &
+cd QA-Learning-Platform-2.0 && PORT=5000 npm run dev"""]
+build = ["bash", "-c", "cd QA-Learning-Platform-2.0 && npm install && npm run build"]
