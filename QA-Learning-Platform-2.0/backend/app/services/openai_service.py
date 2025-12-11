@@ -31,8 +31,19 @@ class OpenAIService:
             print(f"Error deleting thread {thread_id}: {e}")
             return False
 
-    def send_message(self, thread_id: str, message: str, file_ids: Optional[List[str]] = None) -> str:
+    def send_message(self, thread_id: str, message: str, file_ids: Optional[List[str]] = None, image_file_ids: Optional[List[str]] = None) -> str:
         """Send a message to a thread"""
+        # Prepare content
+        content = [{"type": "text", "text": message}]
+        
+        if image_file_ids:
+            for image_id in image_file_ids:
+                content.append({
+                    "type": "image_file",
+                    "image_file": {"file_id": image_id}
+                })
+
+        # Prepare attachments (for file search)
         attachments = []
         if file_ids:
             attachments = [
@@ -43,7 +54,7 @@ class OpenAIService:
         thread_message = self.client.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
-            content=message,
+            content=content,
             attachments=attachments if attachments else None
         )
         return thread_message.id

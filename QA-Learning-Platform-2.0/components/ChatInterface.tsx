@@ -154,13 +154,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
 
     setIsTyping(true);
     let fileIds: string[] = [];
+    let imageFileIds: string[] = [];
     let messageContent = text.trim();
 
     if (selectedFile) {
       setIsUploading(true);
       try {
         const response = await uploadFile(selectedFile);
-        fileIds.push(response.file_id);
+        if (response.type === 'image') {
+          imageFileIds.push(response.file_id);
+        } else {
+          fileIds.push(response.file_id);
+        }
         messageContent += (messageContent ? '\n' : '') + `[Attached: ${selectedFile.name}]`;
       } catch (error) {
         console.error("Upload failed", error);
@@ -210,7 +215,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
         }
         return msg;
       }));
-    }, fileIds);
+    }, fileIds, imageFileIds);
 
     // Finish streaming
     setMessages(prev => prev.map(msg => {

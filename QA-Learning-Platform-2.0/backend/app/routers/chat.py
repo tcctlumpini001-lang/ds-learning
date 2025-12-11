@@ -42,7 +42,16 @@ async def upload_file(file: UploadFile = File(...)):
     try:
         content = await file.read()
         file_id = openai_service.upload_file(content, file.filename)
-        return {"file_id": file_id, "filename": file.filename}
+        
+        # Determine file type
+        is_image = file.content_type and file.content_type.startswith("image/")
+        file_type = "image" if is_image else "file"
+        
+        return {
+            "file_id": file_id, 
+            "filename": file.filename,
+            "type": file_type
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -70,7 +79,12 @@ async def send_message(request: SendMessageRequest, background_tasks: Background
         session_service.add_message_to_session(session_id, user_message)
 
         # Send message to OpenAI thread
-        openai_service.send_message(session.thread_id, request.message, request.file_ids)
+        openai_service.send_message(
+            session.thread_id, 
+            request.message, 
+            request.file_ids,
+            request.image_file_ids
+        )
 
         # Create and run the assistant
 

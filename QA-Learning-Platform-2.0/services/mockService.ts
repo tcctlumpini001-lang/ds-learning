@@ -6,6 +6,7 @@ export interface SendMessageRequest {
   message: string;
   session_id?: string;
   file_ids?: string[];
+  image_file_ids?: string[];
 }
 
 export interface SendMessageResponse {
@@ -35,6 +36,7 @@ export interface DeleteSessionResponse {
 export interface UploadFileResponse {
   file_id: string;
   filename: string;
+  type: 'image' | 'file';
 }
 
 // Current session ID - in a real app, this would be managed by state/context
@@ -90,7 +92,7 @@ export const deleteSession = async (sessionId: string): Promise<DeleteSessionRes
   return data;
 };
 
-export const sendMessage = async (message: string, fileIds?: string[]): Promise<SendMessageResponse> => {
+export const sendMessage = async (message: string, fileIds?: string[], imageFileIds?: string[]): Promise<SendMessageResponse> => {
   // Create session if we don't have one
   if (!currentSessionId) {
     await createNewSession();
@@ -100,6 +102,7 @@ export const sendMessage = async (message: string, fileIds?: string[]): Promise<
     message,
     session_id: currentSessionId || undefined,
     file_ids: fileIds,
+    image_file_ids: imageFileIds,
   };
 
   const response = await fetch(`${API_BASE_URL}/chat`, {
@@ -132,11 +135,12 @@ export const stopStreaming = (): void => {
 export const generateMockResponse = async (
   prompt: string,
   onChunk: (chunk: string) => void,
-  fileIds?: string[]
+  fileIds?: string[],
+  imageFileIds?: string[]
 ): Promise<void> => {
   try {
     isStreamingStopped = false; // Reset flag at start
-    const response = await sendMessage(prompt, fileIds);
+    const response = await sendMessage(prompt, fileIds, imageFileIds);
 
     // Simulate streaming by sending response character by character
     const assistantContent = response.assistant_response.content;
