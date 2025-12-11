@@ -29,7 +29,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg>
           </div>
           <h1 className="font-serif text-4xl font-semibold tracking-tight text-[#2B2826] dark:text-[#F5F3F0]">Welcome back</h1>
-          <p className="text-base text-[#6B6662] dark:text-[#A8A29E]">Sign in to access your QA learning assistant</p>
+          <p className="text-base text-[#6B6662] dark:text-[#A8A29E]">Sign in to access your Learning assistant</p>
         </div>
 
         <div className="space-y-5 rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] p-8 shadow-lg shadow-black/5 dark:shadow-none">

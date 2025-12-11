@@ -4,7 +4,7 @@ import { Message, Role, User } from '../types';
 import { Button } from './Button';
 import { MessageBubble } from './MessageBubble';
 import { ChatHistorySidebar } from './ChatHistorySidebar';
-import { generateMockResponse, createNewSession, deleteSession, getCurrentSessionId, clearCurrentSession, stopStreaming } from '../services/mockService';
+import { generateMockResponse, createNewSession, deleteSession, getCurrentSessionId, clearCurrentSession, stopStreaming, uploadFile } from '../services/mockService';
 import { EXAMPLE_PROMPTS } from '../constants';
 
 interface ChatInterfaceProps {
@@ -21,10 +21,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   const [isStreaming, setIsStreaming] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
+
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -105,6 +109,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   };
 
   // Auto-resize textarea
+  // Auto-resize textarea
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     if (textareaRef.current) {
@@ -113,19 +118,46 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
   const sendMessage = async (text: string) => {
-     if (!text.trim() || isTyping) return;
+     if ((!text.trim() && !selectedFile) || isTyping || isUploading) return;
+
+    setIsTyping(true);
+    let fileIds: string[] = [];
+    let messageContent = text.trim();
+
+    if (selectedFile) {
+      setIsUploading(true);
+      try {
+        const response = await uploadFile(selectedFile);
+        fileIds.push(response.file_id);
+        messageContent += (messageContent ? '\n' : '') + `[Attached: ${selectedFile.name}]`;
+      } catch (error) {
+        console.error("Upload failed", error);
+        setIsUploading(false);
+        setIsTyping(false);
+        return; // Stop if upload fails
+      } finally {
+        setIsUploading(false);
+        setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: Role.User,
-      content: text.trim(),
+      content: messageContent,
       createdAt: Date.now()
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInput('');
-    setIsTyping(true);
     setIsStreaming(true);
 
     // Reset height
@@ -153,7 +185,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
         }
         return msg;
       }));
-    });
+    }, fileIds);
 
     // Finish streaming
     setMessages(prev => prev.map(msg => {
@@ -336,7 +368,43 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       {/* Input Area */}
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent dark:from-[#1A1816] dark:via-[#1A1816] pt-12 pb-8 px-6">
         <div className="mx-auto max-w-[720px]">
+          {selectedFile && (
+            <div className="mb-2 flex items-center gap-2 rounded-lg bg-white dark:bg-[#1F1D1B] p-2 border border-[#E8E6E1] dark:border-[#2F2D2B] w-fit shadow-sm animate-fade-in">
+              <span className="text-sm text-[#2B2826] dark:text-[#F5F3F0] truncate max-w-[200px] flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                {selectedFile.name}
+              </span>
+              <button 
+                onClick={() => {
+                  setSelectedFile(null);
+                  if (fileInputRef.current) fileInputRef.current.value = '';
+                }} 
+                className="text-[#6B6662] hover:text-red-500 dark:text-[#A8A29E] dark:hover:text-red-400 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+          )}
           <div className="relative flex w-full items-end rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] shadow-lg shadow-black/5 dark:shadow-none ring-offset-2 focus-within:ring-2 focus-within:ring-[#D4A574]/20 dark:focus-within:ring-[#D4A574]/30 transition-all">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className="hidden"
+              accept=".pdf,.txt,.doc,.docx,.csv,.json"
+            />
+            <div className="pb-3 pl-3">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isTyping || isUploading}
+                title="Attach file"
+                className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </Button>
+            </div>
             <textarea
               ref={textareaRef}
               value={input}
@@ -344,9 +412,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               onKeyDown={handleKeyDown}
               placeholder="Ask about documents..."
               rows={1}
-              className="max-h-[200px] min-h-[56px] w-full resize-none bg-transparent px-5 py-4 text-base text-[#2B2826] dark:text-[#F5F3F0] placeholder:text-[#6B6662] dark:placeholder:text-[#A8A29E] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="max-h-[200px] min-h-[56px] w-full resize-none bg-transparent px-3 py-4 text-base text-[#2B2826] dark:text-[#F5F3F0] placeholder:text-[#6B6662] dark:placeholder:text-[#A8A29E] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               style={{ overflowY: input.length > 0 ? 'auto' : 'hidden' }}
-              disabled={isTyping}
+              disabled={isTyping || isUploading}
             />
             <div className="pb-2.5 pr-2.5 flex gap-2">
               {isStreaming && (
@@ -365,12 +433,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               )}
               <Button
                 size="icon"
-                variant={input.trim() ? "primary" : "ghost"}
-                disabled={!input.trim() || isTyping}
+                variant={(input.trim() || selectedFile) ? "primary" : "ghost"}
+                disabled={(!input.trim() && !selectedFile) || isTyping || isUploading}
                 onClick={() => handleSubmit()}
-                className={!input.trim() ? "text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent" : "bg-[#D4A574] hover:bg-[#8B7355] text-white"}
+                className={(!input.trim() && !selectedFile) ? "text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent" : "bg-[#D4A574] hover:bg-[#8B7355] text-white"}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                {isUploading ? (
+                  <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                )}
               </Button>
             </div>
           </div>

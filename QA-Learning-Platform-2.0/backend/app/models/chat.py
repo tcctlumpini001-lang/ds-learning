@@ -17,6 +17,7 @@ class ChatSession(BaseModel):
 class SendMessageRequest(BaseModel):
     message: str
     session_id: Optional[str] = None  # If None, create new session
+    file_ids: Optional[List[str]] = None
 
 class SendMessageResponse(BaseModel):
     session_id: str

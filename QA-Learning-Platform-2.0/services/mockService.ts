@@ -5,6 +5,7 @@ const API_BASE_URL = '/api/v1';
 export interface SendMessageRequest {
   message: string;
   session_id?: string;
+  file_ids?: string[];
 }
 
 export interface SendMessageResponse {
@@ -31,8 +32,30 @@ export interface DeleteSessionResponse {
   deleted: boolean;
 }
 
+export interface UploadFileResponse {
+  file_id: string;
+  filename: string;
+}
+
 // Current session ID - in a real app, this would be managed by state/context
 let currentSessionId: string | null = null;
+
+export const uploadFile = async (file: File): Promise<UploadFileResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_BASE_URL}/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to upload file: ${response.statusText}`);
+  }
+
+  return await response.json();
+};
+
 
 export const createNewSession = async (): Promise<CreateSessionResponse> => {
   const response = await fetch(`${API_BASE_URL}/sessions`, {
@@ -67,7 +90,7 @@ export const deleteSession = async (sessionId: string): Promise<DeleteSessionRes
   return data;
 };
 
-export const sendMessage = async (message: string): Promise<SendMessageResponse> => {
+export const sendMessage = async (message: string, fileIds?: string[]): Promise<SendMessageResponse> => {
   // Create session if we don't have one
   if (!currentSessionId) {
     await createNewSession();
@@ -76,6 +99,7 @@ export const sendMessage = async (message: string): Promise<SendMessageResponse>
   const request: SendMessageRequest = {
     message,
     session_id: currentSessionId || undefined,
+    file_ids: fileIds,
   };
 
   const response = await fetch(`${API_BASE_URL}/chat`, {
@@ -107,11 +131,12 @@ export const stopStreaming = (): void => {
 
 export const generateMockResponse = async (
   prompt: string,
-  onChunk: (chunk: string) => void
+  onChunk: (chunk: string) => void,
+  fileIds?: string[]
 ): Promise<void> => {
   try {
     isStreamingStopped = false; // Reset flag at start
-    const response = await sendMessage(prompt);
+    const response = await sendMessage(prompt, fileIds);
 
     // Simulate streaming by sending response character by character
     const assistantContent = response.assistant_response.content;
@@ -125,6 +150,7 @@ export const generateMockResponse = async (
       onChunk(chars[i]);
     }
   } catch (error) {
+
     console.error('Error sending message:', error);
     // Fallback to a simple error message
     const errorMessage = "Sorry, I encountered an error. Please try again.";

@@ -31,14 +31,32 @@ class OpenAIService:
             print(f"Error deleting thread {thread_id}: {e}")
             return False
 
-    def send_message(self, thread_id: str, message: str) -> str:
+    def send_message(self, thread_id: str, message: str, file_ids: Optional[List[str]] = None) -> str:
         """Send a message to a thread"""
+        attachments = []
+        if file_ids:
+            attachments = [
+                {"file_id": file_id, "tools": [{"type": "file_search"}]}
+                for file_id in file_ids
+            ]
+            
         thread_message = self.client.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
-            content=message
+            content=message,
+            attachments=attachments if attachments else None
         )
         return thread_message.id
+
+    def upload_file(self, file_content: Any, filename: str) -> str:
+        """Upload a file to OpenAI"""
+        # file_content should be a file-like object (bytes)
+        response = self.client.files.create(
+            file=(filename, file_content),
+            purpose="assistants"
+        )
+        return response.id
+
 
     def create_and_run(self, thread_id: str) -> str:
         """Create a run for the assistant on the thread"""

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile, File
 from typing import List
 from datetime import datetime
 from app.models.chat import (
@@ -36,6 +36,16 @@ async def delete_session(session_id: str):
         deleted=deleted
     )
 
+@router.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """Upload a file for the assistant"""
+    try:
+        content = await file.read()
+        file_id = openai_service.upload_file(content, file.filename)
+        return {"file_id": file_id, "filename": file.filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/chat", response_model=SendMessageResponse)
 async def send_message(request: SendMessageRequest, background_tasks: BackgroundTasks):
     """Send a message and get assistant response"""
@@ -60,9 +70,10 @@ async def send_message(request: SendMessageRequest, background_tasks: Background
         session_service.add_message_to_session(session_id, user_message)
 
         # Send message to OpenAI thread
-        openai_service.send_message(session.thread_id, request.message)
+        openai_service.send_message(session.thread_id, request.message, request.file_ids)
 
         # Create and run the assistant
+
         run_id = openai_service.create_and_run(session.thread_id)
 
         # Wait for completion (in production, this should be async)
