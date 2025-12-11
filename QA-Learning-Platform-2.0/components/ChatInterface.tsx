@@ -21,7 +21,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   const [isStreaming, setIsStreaming] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadMenuOpen, setIsUploadMenuOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -136,37 +136,49 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)]);
       setIsUploadMenuOpen(false);
     }
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)]);
       setIsUploadMenuOpen(false);
     }
   };
 
+  const removeFile = (indexToRemove: number) => {
+    setSelectedFiles(prev => prev.filter((_, index) => index !== indexToRemove));
+    if (selectedFiles.length <= 1) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  };
+
   const sendMessage = async (text: string) => {
-     if ((!text.trim() && !selectedFile) || isTyping || isUploading) return;
+     if ((!text.trim() && selectedFiles.length === 0) || isTyping || isUploading) return;
 
     setIsTyping(true);
     let fileIds: string[] = [];
     let imageFileIds: string[] = [];
     let messageContent = text.trim();
 
-    if (selectedFile) {
+    if (selectedFiles.length > 0) {
       setIsUploading(true);
       try {
-        const response = await uploadFile(selectedFile);
-        if (response.type === 'image') {
-          imageFileIds.push(response.file_id);
-        } else {
-          fileIds.push(response.file_id);
-        }
-        messageContent += (messageContent ? '\n' : '') + `[Attached: ${selectedFile.name}]`;
+        const uploadPromises = selectedFiles.map(file => uploadFile(file));
+        const responses = await Promise.all(uploadPromises);
+        
+        responses.forEach((response, index) => {
+          if (response.type === 'image') {
+            imageFileIds.push(response.file_id);
+          } else {
+            fileIds.push(response.file_id);
+          }
+          messageContent += (messageContent ? '\n' : '') + `[Attached: ${selectedFiles[index].name}]`;
+        });
       } catch (error) {
         console.error("Upload failed", error);
         setIsUploading(false);
@@ -174,8 +186,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
         return; // Stop if upload fails
       } finally {
         setIsUploading(false);
-        setSelectedFile(null);
+        setSelectedFiles([]);
         if (fileInputRef.current) fileInputRef.current.value = '';
+        if (imageInputRef.current) imageInputRef.current.value = '';
       }
     }
 
@@ -398,21 +411,22 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       {/* Input Area */}
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent dark:from-[#1A1816] dark:via-[#1A1816] pt-12 pb-8 px-6">
         <div className="mx-auto max-w-[720px]">
-          {selectedFile && (
-            <div className="mb-2 flex items-center gap-2 rounded-lg bg-white dark:bg-[#1F1D1B] p-2 border border-[#E8E6E1] dark:border-[#2F2D2B] w-fit shadow-sm animate-fade-in">
-              <span className="text-sm text-[#2B2826] dark:text-[#F5F3F0] truncate max-w-[200px] flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
-                {selectedFile.name}
-              </span>
-              <button 
-                onClick={() => {
-                  setSelectedFile(null);
-                  if (fileInputRef.current) fileInputRef.current.value = '';
-                }} 
-                className="text-[#6B6662] hover:text-red-500 dark:text-[#A8A29E] dark:hover:text-red-400 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              </button>
+          {selectedFiles.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="flex items-center gap-2 rounded-lg bg-white dark:bg-[#1F1D1B] p-2 border border-[#E8E6E1] dark:border-[#2F2D2B] w-fit shadow-sm animate-fade-in">
+                  <span className="text-sm text-[#2B2826] dark:text-[#F5F3F0] truncate max-w-[200px] flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                    {file.name}
+                  </span>
+                  <button 
+                    onClick={() => removeFile(index)} 
+                    className="text-[#6B6662] hover:text-red-500 dark:text-[#A8A29E] dark:hover:text-red-400 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                </div>
+              ))}
             </div>
           )}
           <div className="relative flex w-full items-end rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] shadow-lg shadow-black/5 dark:shadow-none ring-offset-2 focus-within:ring-2 focus-within:ring-[#D4A574]/20 dark:focus-within:ring-[#D4A574]/30 transition-all">
@@ -421,6 +435,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               ref={fileInputRef}
               onChange={handleFileSelect}
               className="hidden"
+              multiple
               accept=".pdf,.txt,.doc,.docx,.csv,.json"
             />
             <input
@@ -428,6 +443,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               ref={imageInputRef}
               onChange={handleImageSelect}
               className="hidden"
+              multiple
               accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
             />
             <div className="pb-3 pl-3 relative">
@@ -505,10 +521,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               )}
               <Button
                 size="icon"
-                variant={(input.trim() || selectedFile) ? "primary" : "ghost"}
-                disabled={(!input.trim() && !selectedFile) || isTyping || isUploading}
+                variant={(input.trim() || selectedFiles.length > 0) ? "primary" : "ghost"}
+                disabled={(!input.trim() && selectedFiles.length === 0) || isTyping || isUploading}
                 onClick={() => handleSubmit()}
-                className={(!input.trim() && !selectedFile) ? "text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent" : "bg-[#D4A574] hover:bg-[#8B7355] text-white"}
+                className={(!input.trim() && selectedFiles.length === 0) ? "text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent" : "bg-[#D4A574] hover:bg-[#8B7355] text-white"}
               >
                 {isUploading ? (
                   <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
