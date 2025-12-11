@@ -24,11 +24,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadMenuOpen, setIsUploadMenuOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const uploadMenuRef = useRef<HTMLDivElement>(null);
+  const dragCounter = useRef(0);
 
   const scrollToBottom = () => {
 
@@ -154,6 +156,42 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
     if (selectedFiles.length <= 1) {
       if (fileInputRef.current) fileInputRef.current.value = '';
       if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      setSelectedFiles(prev => [...prev, ...droppedFiles]);
+      e.dataTransfer.clearData();
     }
   };
 
@@ -409,7 +447,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       </main>
 
       {/* Input Area */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent dark:from-[#1A1816] dark:via-[#1A1816] pt-12 pb-8 px-6">
+      <div 
+        className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent dark:from-[#1A1816] dark:via-[#1A1816] pt-12 pb-8 px-6"
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <div className="mx-auto max-w-[720px]">
           {selectedFiles.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2">
@@ -429,7 +473,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               ))}
             </div>
           )}
-          <div className="relative flex w-full items-end rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] shadow-lg shadow-black/5 dark:shadow-none ring-offset-2 focus-within:ring-2 focus-within:ring-[#D4A574]/20 dark:focus-within:ring-[#D4A574]/30 transition-all">
+          <div className={`relative flex w-full items-end rounded-2xl border bg-[#FFFFFF] dark:bg-[#1F1D1B] shadow-lg shadow-black/5 dark:shadow-none ring-offset-2 transition-all ${
+            isDragging 
+              ? 'border-[#D4A574] dark:border-[#D4A574] ring-2 ring-[#D4A574]/30 dark:ring-[#D4A574]/40 bg-[#D4A574]/5 dark:bg-[#D4A574]/10' 
+              : 'border-[#E8E6E1] dark:border-[#2F2D2B] focus-within:ring-2 focus-within:ring-[#D4A574]/20 dark:focus-within:ring-[#D4A574]/30'
+          }`}>
+            {isDragging && (
+              <div className="absolute inset-0 flex items-center justify-center bg-[#D4A574]/10 dark:bg-[#D4A574]/20 rounded-2xl z-10 pointer-events-none">
+                <div className="flex flex-col items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D4A574]">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span className="text-[#D4A574] font-medium">วางไฟล์ที่นี่</span>
+                </div>
+              </div>
+            )}
             <input
               type="file"
               ref={fileInputRef}
