@@ -23,9 +23,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadMenuOpen, setIsUploadMenuOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const uploadMenuRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
 
@@ -40,6 +43,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   useEffect(() => {
     checkBackendConnection();
   }, []);
+
+  // Close upload menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (uploadMenuRef.current && !uploadMenuRef.current.contains(event.target as Node)) {
+        setIsUploadMenuOpen(false);
+      }
+    };
+
+    if (isUploadMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isUploadMenuOpen]);
 
   const checkBackendConnection = async () => {
     try {
@@ -121,6 +138,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
+      setIsUploadMenuOpen(false);
+    }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+      setIsUploadMenuOpen(false);
     }
   };
 
@@ -393,17 +418,59 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               className="hidden"
               accept=".pdf,.txt,.doc,.docx,.csv,.json"
             />
-            <div className="pb-3 pl-3">
+            <input
+              type="file"
+              ref={imageInputRef}
+              onChange={handleImageSelect}
+              className="hidden"
+              accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
+            />
+            <div className="pb-3 pl-3 relative">
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => setIsUploadMenuOpen(!isUploadMenuOpen)}
                 disabled={isTyping || isUploading}
-                title="Attach file"
+                title="Upload file or image"
                 className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </Button>
+
+              {/* Upload Dropdown Menu */}
+              {isUploadMenuOpen && (
+                <div
+                  ref={uploadMenuRef}
+                  className="absolute bottom-full left-0 mb-2 bg-white dark:bg-[#1F1D1B] border border-[#E8E6E1] dark:border-[#2F2D2B] rounded-lg shadow-lg dark:shadow-black/30 z-50 min-w-[220px] overflow-hidden"
+                >
+                  <button
+                    onClick={() => {
+                      fileInputRef.current?.click();
+                      setIsUploadMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-[#FAF9F6] dark:hover:bg-[#2F2D2B] transition-colors border-b border-[#E8E6E1] dark:border-[#2F2D2B] text-[#2B2826] dark:text-[#F5F3F0]"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm">อัปโหลดเอกสาร</span>
+                      <span className="text-xs text-[#6B6662] dark:text-[#A8A29E]">PDF, Word, Excel, JSON</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      imageInputRef.current?.click();
+                      setIsUploadMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-[#FAF9F6] dark:hover:bg-[#2F2D2B] transition-colors text-[#2B2826] dark:text-[#F5F3F0]"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm">อัปโหลดรูปภาพ</span>
+                      <span className="text-xs text-[#6B6662] dark:text-[#A8A29E]">JPG, PNG, GIF, WebP</span>
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
             <textarea
               ref={textareaRef}
