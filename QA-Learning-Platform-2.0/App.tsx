@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AuthState, User } from './types';
-import { MOCK_USER, DEV_BYPASS_KEY } from './constants';
+import { MOCK_USER } from './constants';
 import { LoginPage } from './components/LoginPage';
 import { ChatInterface } from './components/ChatInterface';
 
@@ -15,14 +15,13 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // Check for dev bypass or existing session (real backend)
+    // Check for existing session (real backend)
     const checkSession = async () => {
-      const bypass = sessionStorage.getItem(DEV_BYPASS_KEY);
       const storedUser = sessionStorage.getItem('mock_user');
 
-      if (bypass === 'true' || storedUser) {
+      if (storedUser) {
         setAuth({
-          user: storedUser ? JSON.parse(storedUser) : MOCK_USER,
+          user: JSON.parse(storedUser),
           isAuthenticated: true,
           isLoading: false,
         });
@@ -83,7 +82,6 @@ const App: React.FC = () => {
       // ignore
     }
     sessionStorage.removeItem('mock_user');
-    sessionStorage.removeItem(DEV_BYPASS_KEY);
     setAuth({
       user: null,
       isAuthenticated: false,
