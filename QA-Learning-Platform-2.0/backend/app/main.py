@@ -5,11 +5,12 @@ from fastapi.responses import FileResponse
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+
+# Load environment variables before importing routers that might use them
+load_dotenv()
+
 from app.routers import chat
 from app.routers import auth
-
-# Load environment variables
-load_dotenv()
 
 app = FastAPI(
     title="QA Learning Platform Chat API",

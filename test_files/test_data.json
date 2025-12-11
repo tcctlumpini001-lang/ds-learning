@@ -1,0 +1,11 @@
+{
+    "employees": [
+        {
+            "name": "Lily the Brilliant",
+            "role": "QA Engineer",
+            "department": "Innovation",
+            "id": 998877,
+            "skills": ["Testing", "Python", "RAG"]
+        }
+    ]
+}
