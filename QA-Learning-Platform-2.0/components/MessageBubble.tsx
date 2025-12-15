@@ -73,17 +73,54 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
         {/* Message Content */}
         <div className="flex-1 min-w-0">
-          <div className={`prose prose-base max-w-none leading-relaxed break-words ${
+          <div className={`prose prose-base max-w-none leading-[1.75] break-words ${
             isUser
               ? 'text-[#2B2826] dark:text-[#F5F3F0]'
               : 'text-[#2B2826] dark:text-[#F5F3F0]'
-          }`}>
+          }`}
+          style={{
+            fontSize: '15px',
+            lineHeight: '1.75'
+          }}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[rehypeKatex]}
               components={{
+                p: ({ node, ...props }) => (
+                  <p {...props} className="mb-4 last:mb-0" style={{ lineHeight: '1.8', marginTop: '0.5rem' }} />
+                ),
+                ul: ({ node, ...props }) => (
+                  <ul {...props} className="my-5 space-y-3 list-disc pl-6" style={{ marginLeft: '0.5rem' }} />
+                ),
+                ol: ({ node, ...props }) => (
+                  <ol {...props} className="my-5 space-y-3 list-decimal pl-6" style={{ marginLeft: '0.5rem' }} />
+                ),
+                li: ({ node, ...props }) => (
+                  <li {...props} className="ml-1 pl-2" style={{ lineHeight: '1.8', marginBottom: '0.75rem' }} />
+                ),
+                h1: ({ node, ...props }) => (
+                  <h1 {...props} className="text-2xl font-bold mt-6 mb-4 first:mt-0" />
+                ),
+                h2: ({ node, ...props }) => (
+                  <h2 {...props} className="text-xl font-bold mt-5 mb-3 first:mt-0" />
+                ),
+                h3: ({ node, ...props }) => (
+                  <h3 {...props} className="text-lg font-semibold mt-4 mb-2 first:mt-0" />
+                ),
+                code: ({ node, inline, ...props }: any) => 
+                  inline ? (
+                    <code {...props} className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-sm font-mono" />
+                  ) : (
+                    <code {...props} className="block p-3 rounded bg-gray-100 dark:bg-gray-800 text-sm font-mono overflow-x-auto" />
+                  ),
+                pre: ({ node, ...props }) => (
+                  <pre {...props} className="my-4 p-4 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-x-auto" />
+                ),
                 a: ({ node, ...props }) => (
-                  <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" />
+                  <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline" />
+                ),
+                blockquote: ({ node, ...props }) => (
+                  <blockquote {...props} className="my-4 pl-4 border-l-4 border-gray-300 dark:border-gray-600 italic text-gray-700 dark:text-gray-300" />
                 ),
                 table: ({ node, ...props }) => (
                   <div className="overflow-x-auto my-4">

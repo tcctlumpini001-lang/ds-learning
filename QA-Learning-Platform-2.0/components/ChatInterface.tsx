@@ -308,19 +308,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       {/* Header */}
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FAF9F6]/90 dark:bg-[#1A1816]/90 px-6 backdrop-blur-xl">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsSidebarOpen(true)}
-            title="Chat History"
-            className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] md:inline-flex hidden transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12h18"/>
-              <path d="M3 6h18"/>
-              <path d="M3 18h18"/>
-            </svg>
-          </Button>
           <span className="font-serif font-semibold text-[#2B2826] dark:text-[#F5F3F0] text-lg tracking-wide">Learning Platform</span>
           <span className={`rounded-full px-3 py-1 text-xs font-medium ${
             isConnected
@@ -613,20 +600,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
         </div>
       </div>
 
-      {/* Mobile Chat History Button */}
-      <div className="md:hidden fixed bottom-24 left-6 z-30">
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setIsSidebarOpen(true)}
-          className="rounded-full shadow-lg bg-[#D4A574] hover:bg-[#8B7355] text-white"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-            <polyline points="14,2 14,8 20,8"/>
-          </svg>
-        </Button>
-      </div>
       </div>
     </div>
   );
