@@ -310,10 +310,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       />
       <div className="flex flex-col flex-1">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FAF9F6]/90 dark:bg-[#1A1816]/90 px-6 backdrop-blur-xl">
-        <div className="flex items-center gap-2">
-          <span className="font-serif font-semibold text-[#2B2826] dark:text-[#F5F3F0] text-lg tracking-wide">Learning Platform</span>
-          <span className={`rounded-full px-3 py-1 text-xs font-medium ${
+      <header className="sticky top-0 z-10 flex h-14 md:h-16 items-center justify-between border-b border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FAF9F6]/90 dark:bg-[#1A1816]/90 px-3 md:px-6 backdrop-blur-xl">
+        <div className="flex items-center gap-1.5 md:gap-2 flex-1 min-w-0">
+          <span className="font-serif font-semibold text-[#2B2826] dark:text-[#F5F3F0] text-base md:text-lg tracking-wide truncate">Learning Platform</span>
+          <span className={`hidden sm:inline-flex rounded-full px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium whitespace-nowrap ${
             isConnected
               ? 'bg-[#D4A574]/10 text-[#8B7355] dark:bg-[#D4A574]/20 dark:text-[#D4A574]'
               : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
@@ -321,12 +321,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
             {isConnected ? 'Connected' : 'Disconnected'}
           </span>
           {getCurrentSessionId() && (
-            <span className="rounded-full bg-[#D4A574]/10 dark:bg-[#D4A574]/20 px-3 py-1 text-xs text-[#8B7355] dark:text-[#D4A574] font-medium">
+            <span className="hidden lg:inline-flex rounded-full bg-[#D4A574]/10 dark:bg-[#D4A574]/20 px-2 md:px-3 py-0.5 md:py-1 text-xs text-[#8B7355] dark:text-[#D4A574] font-medium whitespace-nowrap">
               Session Active
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           {messages.length > 0 && (
             <>
               <Button
@@ -335,7 +335,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                 onClick={() => window.location.reload()}
                 title="Refresh Page"
                 disabled={isTyping}
-                className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] transition-colors"
+                className="hidden sm:flex text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
@@ -360,7 +360,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                   <line x1="14" x2="14" y1="11" y2="17"/>
                 </svg>
               </Button>
-              <Button variant="ghost" size="sm" onClick={startNewSession} title="New Chat" disabled={isTyping}>
+              <Button variant="ghost" size="sm" onClick={startNewSession} title="New Chat" disabled={isTyping} className="hidden md:flex">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
                   <polyline points="14,2 14,8 20,8"/>
@@ -397,21 +397,21 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto px-6 py-12 md:py-16 scroll-smooth">
+      <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-8 md:py-12 lg:py-16 scroll-smooth">
         <div className="mx-auto max-w-[720px] h-full flex flex-col">
           {messages.length === 0 ? (
             /* Empty State */
-            <div className="flex flex-1 flex-col items-center justify-center space-y-12 animate-fade-in">
-               <div className="space-y-3 text-center">
-                 <h1 className="flex items-center justify-center gap-3 font-serif text-5xl font-semibold tracking-tight text-[#2B2826] dark:text-[#F5F3F0] sm:text-6xl">
+            <div className="flex flex-1 flex-col items-center justify-center space-y-8 md:space-y-12 animate-fade-in px-2">
+               <div className="space-y-2 md:space-y-3 text-center">
+                 <h1 className="flex items-center justify-center gap-2 md:gap-3 font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-[#2B2826] dark:text-[#F5F3F0]">
                     <span className="bg-gradient-to-br from-[#2B2826] via-[#6B6662] to-[#D4A574] dark:from-[#F5F3F0] dark:via-[#A8A29E] dark:to-[#D4A574] bg-clip-text text-transparent">
                       Hello, {user?.name?.split(' ')[0] || 'User'}
                     </span>
                  </h1>
-                 <h2 className="text-2xl md:text-3xl text-[#6B6662] dark:text-[#A8A29E] font-light">How can I help you today?</h2>
+                 <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-[#6B6662] dark:text-[#A8A29E] font-light px-4">How can I help you today?</h2>
                </div>
 
-               <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 max-w-[650px]">
+               <div className="grid w-full grid-cols-1 gap-3 md:gap-4 sm:grid-cols-2 max-w-[650px]">
                   {suggestedQueries.map((prompt, index) => {
                     // Handle both string and object formats
                     const messageText = typeof prompt === 'string' ? prompt : (prompt as any).message;
@@ -423,13 +423,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                       key={index}
                       onClick={() => sendMessage(messageText)}
                       style={{ animationDelay: `${index * 0.1}s` }}
-                      className="group flex flex-col items-start gap-2 rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] p-5 text-left transition-all hover:border-[#D4A574] dark:hover:border-[#D4A574] hover:shadow-sm animate-fade-in-up opacity-0"
+                      className="group flex flex-col items-start gap-1.5 md:gap-2 rounded-xl md:rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] p-4 md:p-5 text-left transition-all hover:border-[#D4A574] dark:hover:border-[#D4A574] hover:shadow-sm animate-fade-in-up opacity-0 active:scale-95"
                     >
-                      <span className="font-medium text-[#2B2826] dark:text-[#F5F3F0] group-hover:text-[#D4A574] dark:group-hover:text-[#D4A574] transition-colors">
+                      <span className="font-medium text-sm md:text-base text-[#2B2826] dark:text-[#F5F3F0] group-hover:text-[#D4A574] dark:group-hover:text-[#D4A574] transition-colors">
                         {heading}
                       </span>
                       {subheading && (
-                        <span className="text-sm text-[#6B6662] dark:text-[#A8A29E]">
+                        <span className="text-xs md:text-sm text-[#6B6662] dark:text-[#A8A29E]">
                           {subheading}
                         </span>
                       )}
@@ -440,7 +440,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
             </div>
           ) : (
             /* Message List */
-            <div className="space-y-8 pb-32">
+            <div className="space-y-6 md:space-y-8 pb-32 md:pb-36">
               {messages.map((msg) => (
                 <MessageBubble key={msg.id} message={msg} />
               ))}
@@ -452,7 +452,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
 
       {/* Input Area */}
       <div 
-        className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent dark:from-[#1A1816] dark:via-[#1A1816] pt-12 pb-8 px-6"
+        className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent dark:from-[#1A1816] dark:via-[#1A1816] pt-8 md:pt-12 pb-4 md:pb-8 px-3 sm:px-4 md:px-6"
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -460,24 +460,24 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       >
         <div className="mx-auto max-w-[720px]">
           {selectedFiles.length > 0 && (
-            <div className="mb-2 flex flex-wrap gap-2">
+            <div className="mb-2 flex flex-wrap gap-1.5 md:gap-2">
               {selectedFiles.map((file, index) => (
-                <div key={index} className="flex items-center gap-2 rounded-lg bg-white dark:bg-[#1F1D1B] p-2 border border-[#E8E6E1] dark:border-[#2F2D2B] w-fit shadow-sm animate-fade-in">
-                  <span className="text-sm text-[#2B2826] dark:text-[#F5F3F0] truncate max-w-[200px] flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                <div key={index} className="flex items-center gap-1.5 md:gap-2 rounded-lg bg-white dark:bg-[#1F1D1B] p-1.5 md:p-2 border border-[#E8E6E1] dark:border-[#2F2D2B] w-fit shadow-sm animate-fade-in">
+                  <span className="text-xs md:text-sm text-[#2B2826] dark:text-[#F5F3F0] truncate max-w-[120px] sm:max-w-[200px] flex items-center gap-1.5 md:gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-[14px] md:h-[14px]"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
                     {file.name}
                   </span>
                   <button 
                     onClick={() => removeFile(index)} 
-                    className="text-[#6B6662] hover:text-red-500 dark:text-[#A8A29E] dark:hover:text-red-400 transition-colors"
+                    className="text-[#6B6662] hover:text-red-500 dark:text-[#A8A29E] dark:hover:text-red-400 transition-colors p-0.5"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-[14px] md:h-[14px]"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                   </button>
                 </div>
               ))}
             </div>
           )}
-          <div className={`relative flex w-full items-end rounded-2xl border bg-[#FFFFFF] dark:bg-[#1F1D1B] shadow-lg shadow-black/5 dark:shadow-none ring-offset-2 transition-all ${
+          <div className={`relative flex w-full items-end rounded-xl md:rounded-2xl border bg-[#FFFFFF] dark:bg-[#1F1D1B] shadow-lg shadow-black/5 dark:shadow-none ring-offset-2 transition-all ${
             isDragging 
               ? 'border-[#D4A574] dark:border-[#D4A574] ring-2 ring-[#D4A574]/30 dark:ring-[#D4A574]/40 bg-[#D4A574]/5 dark:bg-[#D4A574]/10' 
               : 'border-[#E8E6E1] dark:border-[#2F2D2B] focus-within:ring-2 focus-within:ring-[#D4A574]/20 dark:focus-within:ring-[#D4A574]/30'
@@ -510,35 +510,35 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               multiple
               accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
             />
-            <div className="pb-3 pl-3 relative">
+            <div className="pb-2 md:pb-3 pl-2 md:pl-3 relative">
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => setIsUploadMenuOpen(!isUploadMenuOpen)}
                 disabled={isTyping || isUploading}
                 title="Upload file or image"
-                className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent transition-colors"
+                className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent transition-colors h-8 w-8 md:h-10 md:w-10"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-5 md:h-5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </Button>
 
               {/* Upload Dropdown Menu */}
               {isUploadMenuOpen && (
                 <div
                   ref={uploadMenuRef}
-                  className="absolute bottom-full left-0 mb-2 bg-white dark:bg-[#1F1D1B] border border-[#E8E6E1] dark:border-[#2F2D2B] rounded-lg shadow-lg dark:shadow-black/30 z-50 min-w-[220px] overflow-hidden"
+                  className="absolute bottom-full left-0 mb-2 bg-white dark:bg-[#1F1D1B] border border-[#E8E6E1] dark:border-[#2F2D2B] rounded-lg shadow-lg dark:shadow-black/30 z-50 min-w-[200px] md:min-w-[220px] overflow-hidden"
                 >
                   <button
                     onClick={() => {
                       fileInputRef.current?.click();
                       setIsUploadMenuOpen(false);
                     }}
-                    className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-[#FAF9F6] dark:hover:bg-[#2F2D2B] transition-colors border-b border-[#E8E6E1] dark:border-[#2F2D2B] text-[#2B2826] dark:text-[#F5F3F0]"
+                    className="w-full px-3 md:px-4 py-2.5 md:py-3 text-left flex items-center gap-2 md:gap-3 hover:bg-[#FAF9F6] dark:hover:bg-[#2F2D2B] transition-colors border-b border-[#E8E6E1] dark:border-[#2F2D2B] text-[#2B2826] dark:text-[#F5F3F0] active:scale-95"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-4 md:h-4"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
                     <div className="flex flex-col">
-                      <span className="font-medium text-sm">อัปโหลดเอกสาร</span>
-                      <span className="text-xs text-[#6B6662] dark:text-[#A8A29E]">PDF, Word, Excel, JSON</span>
+                      <span className="font-medium text-xs md:text-sm">อัปโหลดเอกสาร</span>
+                      <span className="text-[10px] md:text-xs text-[#6B6662] dark:text-[#A8A29E]">PDF, Word, Excel, JSON</span>
                     </div>
                   </button>
                   <button
@@ -546,12 +546,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                       imageInputRef.current?.click();
                       setIsUploadMenuOpen(false);
                     }}
-                    className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-[#FAF9F6] dark:hover:bg-[#2F2D2B] transition-colors text-[#2B2826] dark:text-[#F5F3F0]"
+                    className="w-full px-3 md:px-4 py-2.5 md:py-3 text-left flex items-center gap-2 md:gap-3 hover:bg-[#FAF9F6] dark:hover:bg-[#2F2D2B] transition-colors text-[#2B2826] dark:text-[#F5F3F0] active:scale-95"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-4 md:h-4"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     <div className="flex flex-col">
-                      <span className="font-medium text-sm">อัปโหลดรูปภาพ</span>
-                      <span className="text-xs text-[#6B6662] dark:text-[#A8A29E]">JPG, PNG, GIF, WebP</span>
+                      <span className="font-medium text-xs md:text-sm">อัปโหลดรูปภาพ</span>
+                      <span className="text-[10px] md:text-xs text-[#6B6662] dark:text-[#A8A29E]">JPG, PNG, GIF, WebP</span>
                     </div>
                   </button>
                 </div>
@@ -564,20 +564,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               onKeyDown={handleKeyDown}
               placeholder="Ask about documents..."
               rows={1}
-              className="max-h-[200px] min-h-[56px] w-full resize-none bg-transparent px-3 py-4 text-base text-[#2B2826] dark:text-[#F5F3F0] placeholder:text-[#6B6662] dark:placeholder:text-[#A8A29E] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="max-h-[200px] min-h-[48px] md:min-h-[56px] w-full resize-none bg-transparent px-2 md:px-3 py-3 md:py-4 text-sm md:text-base text-[#2B2826] dark:text-[#F5F3F0] placeholder:text-[#6B6662] dark:placeholder:text-[#A8A29E] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               style={{ overflowY: input.length > 0 ? 'auto' : 'hidden' }}
               disabled={isTyping || isUploading}
             />
-            <div className="pb-2.5 pr-2.5 flex gap-2">
+            <div className="pb-2 md:pb-2.5 pr-2 md:pr-2.5 flex gap-1.5 md:gap-2">
               {isStreaming && (
                 <Button
                   size="icon"
                   variant="secondary"
                   onClick={handleStopStreaming}
                   title="Stop generating"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50/50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 transition-colors"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50/50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 transition-colors h-8 w-8 md:h-10 md:w-10"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-4 md:h-4">
                     <rect width="4" height="16" x="6" y="4" rx="1"/>
                     <rect width="4" height="16" x="14" y="4" rx="1"/>
                   </svg>
@@ -588,17 +588,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                 variant={(input.trim() || selectedFiles.length > 0) ? "primary" : "ghost"}
                 disabled={(!input.trim() && selectedFiles.length === 0) || isTyping || isUploading}
                 onClick={() => handleSubmit()}
-                className={(!input.trim() && selectedFiles.length === 0) ? "text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent" : "bg-[#D4A574] hover:bg-[#8B7355] text-white"}
+                className={`h-8 w-8 md:h-10 md:w-10 ${(!input.trim() && selectedFiles.length === 0) ? "text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-transparent dark:hover:bg-transparent" : "bg-[#D4A574] hover:bg-[#8B7355] text-white"}`}
               >
                 {isUploading ? (
-                  <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                  <svg className="animate-spin w-4 h-4 md:w-[18px] md:h-[18px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  <svg className="w-4 h-4 md:w-[18px] md:h-[18px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 )}
               </Button>
             </div>
           </div>
-          <p className="mt-3 text-center text-xs text-[#6B6662] dark:text-[#A8A29E]">
+          <p className="mt-2 md:mt-3 text-center text-[10px] md:text-xs text-[#6B6662] dark:text-[#A8A29E] px-2">
             AI can make mistakes. Consider checking important information.
           </p>
         </div>
