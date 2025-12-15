@@ -66,7 +66,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
 
   const checkBackendConnection = async () => {
     try {
-      const response = await fetch('/health');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch('/health', { signal: controller.signal });
+      clearTimeout(timeoutId);
       setIsConnected(response.ok);
     } catch (error) {
       setIsConnected(false);

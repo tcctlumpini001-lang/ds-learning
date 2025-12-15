@@ -8,6 +8,24 @@ A document-based Q&A learning platform that combines a React frontend with a Pyt
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (Dec 15, 2025)
+
+### Fixed Issues
+1. **Dynamic Suggestions Race Condition** - Added sessionStorage caching so cached suggestions display instantly while fresh suggestions load in background (15 second timeout)
+2. **"Disconnected" Status** - Added 5 second timeout to health check to prevent hanging requests
+3. **Missing npm packages** - Installed react-markdown, remark-gfm, remark-math, rehype-katex for markdown rendering
+4. **Production OAuth Redirect** - Updated GOOGLE_REDIRECT_URI and FRONTEND_URL to https://ds-learning.replit.app/api/v1/auth/callback
+
+### Backend Improvements
+- Added detailed logging to suggest_initial_suggestions() with [SUGGESTIONS] prefix for debugging
+- Dynamic suggestions now successfully generated from OpenAI Assistant (7-9 seconds, takes time to call API)
+
+### Frontend Improvements
+- App.tsx now checks sessionStorage cache first for instant suggestions display
+- Fresh suggestions fetched in background with AbortController timeout
+- ChatInterface.tsx health check now has 5 second timeout with AbortController
+- Better error handling and logging for suggestion loading
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -33,28 +51,33 @@ Preferred communication style: Simple, everyday language.
   - Vector stores for document retrieval (file_search)
   - Streaming responses
   - Image analysis support
+- **Suggestion Generation**: Dynamic prompts generated from documents via Assistant (takes ~7-9 seconds)
 - **Required Environment Variables**:
   - `OPENAI_API_KEY` - OpenAI API key
-  - `ASSISTANT_ID` - Pre-configured OpenAI Assistant ID
+  - `ASSISTANT_ID` - Pre-configured OpenAI Assistant ID (asst_LgzuWTu2krrNvi4JxQojnLTJ)
   - Vector store ID is hardcoded: `vs_6937893e6974819181cb9f7400fd25e9`
 
 ### Authentication
 - **Method**: Google OAuth 2.0
 - **Flow**: Server-side OAuth with redirect
 - **Session Management**: In-memory session storage (auth_service.py)
+- **Production Redirect URI**: https://ds-learning.replit.app/api/v1/auth/callback
 - **Required Environment Variables**:
   - `GOOGLE_CLIENT_ID`
   - `GOOGLE_CLIENT_SECRET`
-  - `OAUTH_REDIRECT_URI`
+  - `OAUTH_REDIRECT_URI` (production: https://ds-learning.replit.app/api/v1/auth/callback)
+  - `FRONTEND_URL` (production: https://ds-learning.replit.app)
 
 ### Data Storage
 - **Chat Sessions**: In-memory storage via SessionService
-- **User Sessions**: In-memory storage via AuthService
+- **User Sessions**: In-memory session with cookie-based auth
+- **Suggestion Cache**: sessionStorage for instant load on repeat visits
 - **Note**: No persistent database currently configured; sessions are lost on server restart
 
 ### Development Proxy
 - Vite dev server proxies `/api` and `/health` requests to backend at `http://localhost:8000`
 - Frontend runs on port 5000, backend on port 8000
+- Production: FastAPI serves both API and frontend static files on port 5000
 
 ## External Dependencies
 
@@ -66,7 +89,8 @@ Preferred communication style: Simple, everyday language.
 
 ### Google OAuth 2.0
 - Used for user authentication
-- Requires Google Cloud Console project with OAuth credentials configured
+- Requires Google Cloud Console project with OAuth credentials
+- Must add https://ds-learning.replit.app/api/v1/auth/callback to authorized redirect URIs
 
 ### CDN Dependencies
 - Tailwind CSS (loaded via CDN in index.html)
@@ -75,8 +99,9 @@ Preferred communication style: Simple, everyday language.
 ### Key npm Packages
 - `react-markdown` - Markdown rendering
 - `remark-gfm` - GitHub Flavored Markdown
-- `remark-math` / `rehype-katex` - Math equation rendering
-- `katex` - LaTeX rendering
+- `remark-math` - Math notation support
+- `rehype-katex` - LaTeX math rendering
+- `katex` - LaTeX rendering engine
 
 ### Key Python Packages
 - `fastapi` - Web framework

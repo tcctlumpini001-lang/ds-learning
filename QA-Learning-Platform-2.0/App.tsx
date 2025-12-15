@@ -21,9 +21,39 @@ const App: React.FC = () => {
   // Load suggestions on mount
   useEffect(() => {
     const loadSuggestions = async () => {
+      // Check cache first
+      const cachedSuggestions = sessionStorage.getItem('suggestions');
+      if (cachedSuggestions) {
+        try {
+          const parsed = JSON.parse(cachedSuggestions);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            console.log('[APP] Using cached suggestions:', parsed);
+            setSuggestions(parsed);
+            setSuggestionsLoaded(true);
+            // Load fresh suggestions in background
+            fetchFreshSuggestions();
+            return;
+          }
+        } catch (e) {
+          console.log('[APP] Cache parse error, fetching fresh');
+        }
+      }
+
+      // No cache, load now
+      await fetchFreshSuggestions();
+    };
+
+    const fetchFreshSuggestions = async () => {
       try {
-        console.log('[APP] Loading suggestions from /api/v1/chat/initialize');
-        const resp = await fetch('/api/v1/chat/initialize', { method: 'POST' });
+        console.log('[APP] Fetching fresh suggestions from /api/v1/chat/initialize');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        
+        const resp = await fetch('/api/v1/chat/initialize', { 
+          method: 'POST',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
         console.log('[APP] Response status:', resp.status);
         
         if (!resp.ok) {
@@ -32,10 +62,9 @@ const App: React.FC = () => {
         
         const data = await resp.json();
         console.log('[APP] Response data:', data);
-        console.log('[APP] Suggestions:', data.suggestions);
         
         if (data.suggestions && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
-          console.log('[APP] Using dynamic suggestions:', data.suggestions);
+          console.log('[APP] Using fresh dynamic suggestions:', data.suggestions);
           setSuggestions(data.suggestions);
           setInitialThreadId(data.thread_id || null);
           sessionStorage.setItem('suggestions', JSON.stringify(data.suggestions));
@@ -43,22 +72,25 @@ const App: React.FC = () => {
             sessionStorage.setItem('initialThreadId', data.thread_id);
           }
         } else {
-          throw new Error('Invalid suggestions format or empty suggestions');
+          throw new Error('Invalid suggestions format');
         }
         setSuggestionsLoaded(true);
       } catch (err) {
         console.error('[APP] Failed to load suggestions:', err);
-        // Fallback suggestions
-        const fallback = [
-          "นิยามการประมวลผลภาพ และความสำคัญของมัน",
-          "Unitary และ Fourier transform ต่างกันอย่างไร",
-          "จะคำนวณสถิติภาพได้อย่างไร",
-          "Sharpen Filters ใช้เพื่ออะไร"
-        ];
-        console.log('[APP] Using fallback suggestions:', fallback);
-        setSuggestions(fallback);
+        // Use fallback only if no cache
+        const cachedSuggestions = sessionStorage.getItem('suggestions');
+        if (!cachedSuggestions) {
+          const fallback = [
+            "นิยามการประมวลผลภาพ และความสำคัญของมัน",
+            "Unitary และ Fourier transform ต่างกันอย่างไร",
+            "จะคำนวณสถิติภาพได้อย่างไร",
+            "Sharpen Filters ใช้เพื่ออะไร"
+          ];
+          console.log('[APP] Using fallback suggestions:', fallback);
+          setSuggestions(fallback);
+          sessionStorage.setItem('suggestions', JSON.stringify(fallback));
+        }
         setSuggestionsLoaded(true);
-        sessionStorage.setItem('suggestions', JSON.stringify(fallback));
       }
     };
 
