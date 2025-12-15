@@ -1,4 +1,9 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { Message, Role } from '../types';
 
 interface MessageBubbleProps {
@@ -7,7 +12,6 @@ interface MessageBubbleProps {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === Role.User;
-  const lines = message.content.split('\n');
 
   return (
     <div className="flex w-full animate-fade-in-up">
@@ -22,25 +26,42 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           {isUser ? (
              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           ) : (
-             <span classname="text-sm font-medium tracking-tight">LP</span>
+             <span className="text-sm font-medium tracking-tight">LP</span>
           )}
         </div>
 
         {/* Message Content */}
         <div className="flex-1 min-w-0">
-          <div className={`prose prose-base max-w-none leading-relaxed ${
+          <div className={`prose prose-base max-w-none leading-relaxed break-words ${
             isUser
               ? 'text-[#2B2826] dark:text-[#F5F3F0]'
               : 'text-[#2B2826] dark:text-[#F5F3F0]'
           }`}>
-            {lines.map((line, i) => (
-               <p key={i} className="mb-2 last:mb-0 min-h-[1.75em] break-words">
-                 {line || '\u00A0'}
-                 {i === lines.length - 1 && message.isStreaming && (
-                    <span className="typing-cursor" />
-                 )}
-               </p>
-            ))}
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[rehypeKatex]}
+              components={{
+                a: ({ node, ...props }) => (
+                  <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" />
+                ),
+                table: ({ node, ...props }) => (
+                  <div className="overflow-x-auto my-4">
+                    <table {...props} className="min-w-full divide-y divide-gray-300 border border-gray-300 dark:divide-gray-700 dark:border-gray-700" />
+                  </div>
+                ),
+                th: ({ node, ...props }) => (
+                  <th {...props} className="px-3 py-2 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800" />
+                ),
+                td: ({ node, ...props }) => (
+                  <td {...props} className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700" />
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+            {message.isStreaming && (
+               <span className="typing-cursor inline-block w-2 h-4 ml-1 align-middle bg-current animate-pulse" />
+            )}
           </div>
         </div>
 
