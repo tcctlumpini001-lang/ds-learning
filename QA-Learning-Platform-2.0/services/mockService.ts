@@ -144,29 +144,57 @@ export const generateMockResponse = async (
 
     // Simulate streaming by sending response character by character
     const assistantContent = response.assistant_response.content;
-    const chars = assistantContent.split('');
+    // Tune streaming: larger chunks with safer boundaries and moderate delay
+    const STREAM_CHUNK_SIZE = 18; // number of characters per chunk
+    const STREAM_DELAY_MS = 22; // delay between chunks (ms)
+    const SAFE_BOUNDARIES = [' ', '\n', '\t', '.', ',', ';', ':', ')', ']', '}', '—', '–'];
 
-    for (let i = 0; i < chars.length; i++) {
+    let index = 0;
+    while (index < assistantContent.length) {
       if (isStreamingStopped) {
         break; // Stop streaming if requested
       }
-      await new Promise(resolve => setTimeout(resolve, 30)); // 30ms delay between chars
-      onChunk(chars[i]);
+      const tentativeNext = Math.min(index + STREAM_CHUNK_SIZE, assistantContent.length);
+      let nextIndex = tentativeNext;
+      // Avoid splitting mid-token (helps with LaTeX/markdown rendering)
+      if (tentativeNext < assistantContent.length) {
+        const window = assistantContent.slice(index, tentativeNext);
+        // Try to cut at the last safe boundary within the window
+        let cut = -1;
+        for (let i = window.length - 1; i >= 0; i--) {
+          if (SAFE_BOUNDARIES.includes(window[i])) {
+            cut = i;
+            break;
+          }
+        }
+        if (cut > 3) { // ensure we don't produce too tiny chunks
+          nextIndex = index + cut + 1;
+        }
+      }
+
+      const chunk = assistantContent.slice(index, nextIndex);
+      onChunk(chunk);
+      index = nextIndex;
+      await new Promise(resolve => setTimeout(resolve, STREAM_DELAY_MS));
     }
   } catch (error) {
 
     console.error('Error sending message:', error);
     // Fallback to a simple error message
     const errorMessage = "Sorry, I encountered an error. Please try again.";
-    const chars = errorMessage.split('');
+    const STREAM_CHUNK_SIZE = 18;
+    const STREAM_DELAY_MS = 22;
     isStreamingStopped = false; // Reset flag for error case
-
-    for (let i = 0; i < chars.length; i++) {
+    let index = 0;
+    while (index < errorMessage.length) {
       if (isStreamingStopped) {
         break;
       }
-      await new Promise(resolve => setTimeout(resolve, 30));
-      onChunk(chars[i]);
+      const nextIndex = Math.min(index + STREAM_CHUNK_SIZE, errorMessage.length);
+      const chunk = errorMessage.slice(index, nextIndex);
+      onChunk(chunk);
+      index = nextIndex;
+      await new Promise(resolve => setTimeout(resolve, STREAM_DELAY_MS));
     }
   }
 };

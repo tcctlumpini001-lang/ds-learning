@@ -10,8 +10,49 @@ interface MessageBubbleProps {
   message: Message;
 }
 
+function sanitizeForMath(content: string): string {
+  // Remove OpenAI-style citation markers like 【...†...】
+  const cleaned = content.replace(/【.*?†.*?】/g, '');
+  // Strip square brackets that wrap lines: [ ... ] → ...
+  const lines = cleaned.split('\n').map(line => {
+    const trimmed = line.trim();
+    // Remove lines that are just a single bracket
+    if (trimmed === '[' || trimmed === ']') {
+      return '';
+    }
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      return trimmed.slice(1, -1);
+    }
+    return line;
+  });
+  return lines.join('\n');
+}
+
+function normalizeMathDelimiters(content: string): string {
+  // If lines contain LaTeX commands but no $ delimiters, wrap them so rehype-katex can render.
+  const latexHints = /(\\frac|\\sqrt|\\partial|\\nabla|\\tan|\\text|\\left|\\right|\\approx|\\sum|\\int|\\vec|\\begin\{[a-zA-Z]+\}|\\end\{[a-zA-Z]+\})/;
+  let text = content;
+  // Ensure environments like bmatrix are wrapped as block math
+  text = text.replace(/\\begin\{bmatrix\}/g, '$$\\begin{bmatrix}');
+  text = text.replace(/\\end\{bmatrix\}/g, '\\end{bmatrix}$$');
+
+  const lines = text.split('\n').map(line => {
+    const trimmed = line.trim();
+    // Convert 'text{...}' to '\\text{...}' if missing leading backslash
+    const fixedText = trimmed.replace(/(^|[^\\])text\{/g, '$1\\text{');
+    // Heuristic: if contains LaTeX and no $ delimiters, wrap as block $$...$$
+    if (latexHints.test(fixedText) && fixedText.indexOf('$') === -1) {
+      return `$$\n${fixedText}\n$$`;
+    }
+    return fixedText;
+  });
+  return lines.join('\n');
+}
+
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === Role.User;
+  const contentSanitized = sanitizeForMath(message.content || '');
+  const content = normalizeMathDelimiters(contentSanitized);
 
   return (
     <div className="flex w-full animate-fade-in-up">
@@ -57,7 +98,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                 ),
               }}
             >
-              {message.content}
+              {content}
             </ReactMarkdown>
             {message.isStreaming && (
                <span className="typing-cursor inline-block w-2 h-4 ml-1 align-middle bg-current animate-pulse" />
