@@ -12,11 +12,9 @@ interface ChatInterfaceProps {
   onLogout: () => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
-  initialSuggestions?: string[];
-  initialThreadId?: string | null;
 }
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, isDarkMode, onToggleTheme, initialSuggestions = [], initialThreadId = null }) => {
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, isDarkMode, onToggleTheme }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -27,8 +25,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadMenuOpen, setIsUploadMenuOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [suggestedQueries] = useState(initialSuggestions.length > 0 ? initialSuggestions : EXAMPLE_PROMPTS);
-  const [currentSessionId, setCurrentSessionId] = useState(initialThreadId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -421,30 +417,21 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                </div>
 
                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 max-w-[650px]">
-                  {suggestedQueries.map((prompt, index) => {
-                    // Handle both string and object formats
-                    const messageText = typeof prompt === 'string' ? prompt : (prompt as any).message;
-                    const heading = typeof prompt === 'string' ? prompt : (prompt as any).heading;
-                    const subheading = typeof prompt === 'string' ? '' : (prompt as any).subheading;
-                    
-                    return (
+                  {EXAMPLE_PROMPTS.map((prompt, index) => (
                     <button
                       key={index}
-                      onClick={() => sendMessage(messageText)}
+                      onClick={() => sendMessage(prompt.message)}
                       style={{ animationDelay: `${index * 0.1}s` }}
                       className="group flex flex-col items-start gap-2 rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] p-5 text-left transition-all hover:border-[#D4A574] dark:hover:border-[#D4A574] hover:shadow-sm animate-fade-in-up opacity-0"
                     >
                       <span className="font-medium text-[#2B2826] dark:text-[#F5F3F0] group-hover:text-[#D4A574] dark:group-hover:text-[#D4A574] transition-colors">
-                        {heading}
+                        {prompt.heading}
                       </span>
-                      {subheading && (
-                        <span className="text-sm text-[#6B6662] dark:text-[#A8A29E]">
-                          {subheading}
-                        </span>
-                      )}
+                      <span className="text-sm text-[#6B6662] dark:text-[#A8A29E]">
+                        {prompt.subheading}
+                      </span>
                     </button>
-                    );
-                  })}
+                  ))}
                </div>
             </div>
           ) : (

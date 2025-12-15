@@ -24,28 +24,6 @@ async def create_session():
         thread_id=session.thread_id
     )
 
-@router.post("/chat/initialize")
-async def initialize_chat():
-    """Generate initial suggestions for the chat interface"""
-    try:
-        thread_id, suggestions = openai_service.generate_initial_suggestions()
-        return {
-            "thread_id": thread_id,
-            "suggestions": suggestions
-        }
-    except Exception as e:
-        print(f"Error in initialize: {str(e)}")
-        # Fallback suggestions
-        return {
-            "thread_id": None,
-            "suggestions": [
-                "นิยามการประมวลผลภาพ และความสำคัญของมัน",
-                "Unitary และ Fourier transform ต่างกันอย่างไร",
-                "จะคำนวณสถิติภาพได้อย่างไร",
-                "Sharpen Filters ใช้เพื่ออะไร"
-            ]
-        }
-
 @router.delete("/sessions/{session_id}", response_model=DeleteSessionResponse)
 async def delete_session(session_id: str):
     """Delete a chat session and its thread"""

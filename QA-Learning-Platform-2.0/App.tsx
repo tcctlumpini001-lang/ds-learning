@@ -13,42 +13,6 @@ const App: React.FC = () => {
   });
 
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [suggestionsLoaded, setSuggestionsLoaded] = useState(false);
-  const [initialThreadId, setInitialThreadId] = useState<string | null>(null);
-  const [isWaitingForSuggestions, setIsWaitingForSuggestions] = useState(false);
-
-  // Load suggestions on mount
-  useEffect(() => {
-    const loadSuggestions = async () => {
-      try {
-        const resp = await fetch('/api/v1/chat/initialize', { method: 'POST' });
-        const data = await resp.json();
-        setSuggestions(data.suggestions || []);
-        setInitialThreadId(data.thread_id || null);
-        setSuggestionsLoaded(true);
-        // Store in sessionStorage
-        sessionStorage.setItem('suggestions', JSON.stringify(data.suggestions || []));
-        if (data.thread_id) {
-          sessionStorage.setItem('initialThreadId', data.thread_id);
-        }
-      } catch (err) {
-        console.error('Failed to load suggestions:', err);
-        // Fallback suggestions
-        const fallback = [
-          "นิยามการประมวลผลภาพ และความสำคัญของมัน",
-          "Unitary และ Fourier transform ต่างกันอย่างไร",
-          "จะคำนวณสถิติภาพได้อย่างไร",
-          "Sharpen Filters ใช้เพื่ออะไร"
-        ];
-        setSuggestions(fallback);
-        setSuggestionsLoaded(true);
-        sessionStorage.setItem('suggestions', JSON.stringify(fallback));
-      }
-    };
-
-    loadSuggestions();
-  }, []);
 
   useEffect(() => {
     // Check for existing session (real backend)
@@ -101,27 +65,6 @@ const App: React.FC = () => {
   };
 
   const handleLogin = () => {
-    // If suggestions haven't loaded yet, show waiting modal
-    if (!suggestionsLoaded) {
-      setIsWaitingForSuggestions(true);
-      
-      // Poll until suggestions are loaded
-      const checkInterval = setInterval(() => {
-        if (suggestionsLoaded) {
-          clearInterval(checkInterval);
-          setIsWaitingForSuggestions(false);
-          proceedToChat();
-        }
-      }, 100);
-      
-      return;
-    }
-    
-    // Suggestions loaded, proceed to chat
-    proceedToChat();
-  };
-
-  const proceedToChat = () => {
     // Persist mock session
     sessionStorage.setItem('mock_user', JSON.stringify(MOCK_USER));
     setAuth({
@@ -162,14 +105,10 @@ const App: React.FC = () => {
           onLogout={handleLogout} 
           isDarkMode={isDarkMode}
           onToggleTheme={toggleTheme}
-          initialSuggestions={suggestions}
-          initialThreadId={initialThreadId}
         />
       ) : (
-        <LoginPage 
-          onLogin={handleLogin}
-          isWaitingForSuggestions={isWaitingForSuggestions}
-        />      )}
+        <LoginPage onLogin={handleLogin} />
+      )}
     </>
   );
 };

@@ -3,10 +3,9 @@ import { Button } from './Button';
 
 interface LoginPageProps {
   onLogin: () => void;
-  isWaitingForSuggestions?: boolean;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isWaitingForSuggestions = false }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleGoogleLogin = () => {
@@ -42,18 +41,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isWaitingForSugge
           </Button>
         </div>
       </div>
-
-      {/* Loading Modal - Show when waiting for suggestions */}
-      {isWaitingForSuggestions && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-[#1F1D1B] rounded-2xl p-8 text-center shadow-xl">
-            <div className="h-10 w-10 mx-auto mb-4 animate-spin border-2 border-[#D4A574] border-t-transparent rounded-full" />
-            <p className="text-[#2B2826] dark:text-[#F5F3F0] font-medium">
-              กำลังเตรียมข้อมูล...
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
