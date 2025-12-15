@@ -1,8 +1,9 @@
 import os
 from openai import OpenAI
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 import time
 from datetime import datetime
+import json
 
 class OpenAIService:
     def __init__(self):
@@ -133,3 +134,60 @@ class OpenAIService:
             }
             for msg in messages.data
         ]
+    def generate_initial_suggestions(self) -> Tuple[Optional[str], List[str]]:
+        """Generate 4 initial query suggestions based on knowledge base"""
+        try:
+            # Create a new thread
+            thread_id = self.create_thread()
+            
+            # Prepare the prompt for generating suggestions
+            prompt = """วิเคราะห์และค้นหาเนื้อหาในเอกสารทั้งหมด แล้วสร้าง 4 คำถามตัวอย่างภาษาไทยที่น่าสนใจ
+แต่ละคำถามไม่เกิน 50 ตัวอักษร และตอบเป็น JSON array เท่านั้น เช่น:
+["คำถาม 1", "คำถาม 2", "คำถาม 3", "คำถาม 4"]"""
+            
+            # Send the message to the thread with file search
+            self.send_message(thread_id, prompt)
+            
+            # Create and run the assistant
+            run_id = self.create_and_run(thread_id)
+            
+            # Wait for completion (timeout 60 seconds)
+            if self.wait_for_run_completion(thread_id, run_id, timeout=60):
+                response = self.get_assistant_response(thread_id)
+                if response:
+                    try:
+                        # Remove citation markers before parsing JSON
+                        # Citations look like 【4:9†book310453.pdf】
+                        cleaned_response = response
+                        import re
+                        cleaned_response = re.sub(r'【.*?†.*?】', '', cleaned_response).strip()
+                        
+                        # Try to parse JSON response
+                        suggestions = json.loads(cleaned_response)
+                        if isinstance(suggestions, list):
+                            return thread_id, suggestions
+                    except json.JSONDecodeError:
+                        print(f"Failed to parse suggestions JSON: {response}")
+            
+            # Fallback suggestions if something goes wrong
+            fallback_suggestions = [
+                "นิยามการประมวลผลภาพ และความสำคัญของมัน",
+                "Unitary และ Fourier transform ต่างกันอย่างไร",
+                "จะคำนวณสถิติภาพได้อย่างไร",
+                "Sharpen Filters ใช้เพื่ออะไร"
+            ]
+            return thread_id, fallback_suggestions
+            
+        except Exception as e:
+            print(f"Error generating initial suggestions: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            
+            # Return None for thread_id and fallback suggestions on error
+            fallback_suggestions = [
+                "นิยามการประมวลผลภาพ และความสำคัญของมัน",
+                "Unitary และ Fourier transform ต่างกันอย่างไร",
+                "จะคำนวณสถิติภาพได้อย่างไร",
+                "Sharpen Filters ใช้เพื่ออะไร"
+            ]
+            return None, fallback_suggestions

@@ -1,8 +1,4 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import remarkGfm from 'remark-gfm';
-import rehypeKatex from 'rehype-katex';
 import { Message, Role } from '../types';
 
 interface MessageBubbleProps {
@@ -11,9 +7,7 @@ interface MessageBubbleProps {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === Role.User;
-  
-  // Add cursor if streaming
-  const content = message.isStreaming ? message.content + '▍' : message.content;
+  const lines = message.content.split('\n');
 
   return (
     <div className="flex w-full animate-fade-in-up">
@@ -28,7 +22,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           {isUser ? (
              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           ) : (
-             <span className="text-sm font-medium tracking-tight">LP</span>
+             <span classname="text-sm font-medium tracking-tight">LP</span>
           )}
         </div>
 
@@ -39,16 +33,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
               ? 'text-[#2B2826] dark:text-[#F5F3F0]'
               : 'text-[#2B2826] dark:text-[#F5F3F0]'
           }`}>
-            <ReactMarkdown
-              remarkPlugins={[remarkMath, remarkGfm]}
-              rehypePlugins={[rehypeKatex]}
-              components={{
-                p: ({node, ...props}) => <p className="mb-2 last:mb-0 min-h-[1.75em] break-words" {...props} />,
-                a: ({node, ...props}) => <a className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
-              }}
-            >
-              {content}
-            </ReactMarkdown>
+            {lines.map((line, i) => (
+               <p key={i} className="mb-2 last:mb-0 min-h-[1.75em] break-words">
+                 {line || '\u00A0'}
+                 {i === lines.length - 1 && message.isStreaming && (
+                    <span className="typing-cursor" />
+                 )}
+               </p>
+            ))}
           </div>
         </div>
 
