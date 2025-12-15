@@ -8,6 +8,9 @@
     "start": "cd QA-Learning-Platform-2.0/backend && python run.py &\ncd QA-Learning-Platform-2.0 && npx serve -s dist -l 5000"
   },
   "dependencies": {
-    "react-markdown": "^10.1.0"
+    "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   }
 }
