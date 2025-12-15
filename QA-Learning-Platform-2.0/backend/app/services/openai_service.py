@@ -254,6 +254,7 @@ class OpenAIService:
         try:
             # Create a new thread
             thread_id = self.create_thread()
+            print(f"[SUGGESTIONS] Created thread: {thread_id}")
             
             # Prepare the prompt for generating suggestions
             prompt = """วิเคราะห์และค้นหาเนื้อหาในเอกสารทั้งหมด แล้วสร้าง 4 คำถามตัวอย่างภาษาไทยที่น่าสนใจ
@@ -262,13 +263,20 @@ class OpenAIService:
             
             # Send the message to the thread with file search
             self.send_message(thread_id, prompt)
+            print(f"[SUGGESTIONS] Sent prompt to thread: {thread_id}")
             
             # Create and run the assistant
             run_id = self.create_and_run(thread_id)
+            print(f"[SUGGESTIONS] Created run: {run_id}")
             
             # Wait for completion (timeout 60 seconds)
-            if self.wait_for_run_completion(thread_id, run_id, timeout=60):
+            completed = self.wait_for_run_completion(thread_id, run_id, timeout=60)
+            print(f"[SUGGESTIONS] Run completed: {completed}")
+            
+            if completed:
                 response = self.get_assistant_response(thread_id)
+                print(f"[SUGGESTIONS] Got response: {response}")
+                
                 if response:
                     try:
                         # Remove citation markers before parsing JSON
@@ -276,15 +284,25 @@ class OpenAIService:
                         cleaned_response = response
                         import re
                         cleaned_response = re.sub(r'【.*?†.*?】', '', cleaned_response).strip()
+                        print(f"[SUGGESTIONS] Cleaned response: {cleaned_response}")
                         
                         # Try to parse JSON response
                         suggestions = json.loads(cleaned_response)
                         if isinstance(suggestions, list):
+                            print(f"[SUGGESTIONS] Successfully parsed {len(suggestions)} suggestions: {suggestions}")
                             return thread_id, suggestions
-                    except json.JSONDecodeError:
-                        print(f"Failed to parse suggestions JSON: {response}")
+                        else:
+                            print(f"[SUGGESTIONS] Response is not a list: {type(suggestions)}")
+                    except json.JSONDecodeError as je:
+                        print(f"[SUGGESTIONS] Failed to parse suggestions JSON: {response}")
+                        print(f"[SUGGESTIONS] JSON Error: {str(je)}")
+                else:
+                    print(f"[SUGGESTIONS] No response received from assistant")
+            else:
+                print(f"[SUGGESTIONS] Run did not complete within timeout")
             
             # Fallback suggestions if something goes wrong
+            print(f"[SUGGESTIONS] Using fallback suggestions")
             fallback_suggestions = [
                 "นิยามการประมวลผลภาพ และความสำคัญของมัน",
                 "Unitary และ Fourier transform ต่างกันอย่างไร",
@@ -294,11 +312,12 @@ class OpenAIService:
             return thread_id, fallback_suggestions
             
         except Exception as e:
-            print(f"Error generating initial suggestions: {str(e)}")
+            print(f"[SUGGESTIONS] Error generating initial suggestions: {str(e)}")
             import traceback
             traceback.print_exc()
             
             # Return None for thread_id and fallback suggestions on error
+            print(f"[SUGGESTIONS] Using fallback suggestions due to exception")
             fallback_suggestions = [
                 "นิยามการประมวลผลภาพ และความสำคัญของมัน",
                 "Unitary และ Fourier transform ต่างกันอย่างไร",

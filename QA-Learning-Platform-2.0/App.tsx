@@ -22,18 +22,32 @@ const App: React.FC = () => {
   useEffect(() => {
     const loadSuggestions = async () => {
       try {
+        console.log('[APP] Loading suggestions from /api/v1/chat/initialize');
         const resp = await fetch('/api/v1/chat/initialize', { method: 'POST' });
-        const data = await resp.json();
-        setSuggestions(data.suggestions || []);
-        setInitialThreadId(data.thread_id || null);
-        setSuggestionsLoaded(true);
-        // Store in sessionStorage
-        sessionStorage.setItem('suggestions', JSON.stringify(data.suggestions || []));
-        if (data.thread_id) {
-          sessionStorage.setItem('initialThreadId', data.thread_id);
+        console.log('[APP] Response status:', resp.status);
+        
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
         }
+        
+        const data = await resp.json();
+        console.log('[APP] Response data:', data);
+        console.log('[APP] Suggestions:', data.suggestions);
+        
+        if (data.suggestions && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+          console.log('[APP] Using dynamic suggestions:', data.suggestions);
+          setSuggestions(data.suggestions);
+          setInitialThreadId(data.thread_id || null);
+          sessionStorage.setItem('suggestions', JSON.stringify(data.suggestions));
+          if (data.thread_id) {
+            sessionStorage.setItem('initialThreadId', data.thread_id);
+          }
+        } else {
+          throw new Error('Invalid suggestions format or empty suggestions');
+        }
+        setSuggestionsLoaded(true);
       } catch (err) {
-        console.error('Failed to load suggestions:', err);
+        console.error('[APP] Failed to load suggestions:', err);
         // Fallback suggestions
         const fallback = [
           "นิยามการประมวลผลภาพ และความสำคัญของมัน",
@@ -41,6 +55,7 @@ const App: React.FC = () => {
           "จะคำนวณสถิติภาพได้อย่างไร",
           "Sharpen Filters ใช้เพื่ออะไร"
         ];
+        console.log('[APP] Using fallback suggestions:', fallback);
         setSuggestions(fallback);
         setSuggestionsLoaded(true);
         sessionStorage.setItem('suggestions', JSON.stringify(fallback));
