@@ -19,8 +19,6 @@ export const MOCK_USER = {
   image: 'https://picsum.photos/seed/user/32/32'
 };
 
-export const DEV_BYPASS_KEY = 'DEV_BYPASS_AUTH';
-
 export const EXAMPLE_PROMPTS = [
   { 
     heading: 'นิยามการประมวลผลภาพ', 

@@ -1,24 +1,18 @@
 import React, { useState } from 'react';
 import { Button } from './Button';
-import { DEV_BYPASS_KEY } from '../constants';
 
 interface LoginPageProps {
   onLogin: () => void;
+  isWaitingForSuggestions?: boolean;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isWaitingForSuggestions = false }) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleGoogleLogin = () => {
     setIsLoggingIn(true);
     // Redirect browser to backend to start Google OAuth flow
     window.location.href = '/api/v1/auth/google';
-  };
-
-  const handleDevBypass = () => {
-    // Set a flag so we can remember this preference
-    sessionStorage.setItem(DEV_BYPASS_KEY, 'true');
-    onLogin();
   };
 
   return (
@@ -46,25 +40,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             )}
             <span className="text-[#2B2826] dark:text-[#F5F3F0] font-medium">Sign in with Google</span>
           </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-[#E8E6E1] dark:border-[#2F2D2B]" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase tracking-wider">
-              <span className="bg-[#FFFFFF] dark:bg-[#1F1D1B] px-3 text-[#6B6662] dark:text-[#A8A29E]">Or continue with</span>
-            </div>
-          </div>
-
-          <Button
-            variant="ghost"
-            className="w-full h-12 text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] hover:bg-[#FAF9F6] dark:hover:bg-[#1A1816] transition-all"
-            onClick={handleDevBypass}
-          >
-            Dev Mode (Bypass Auth)
-          </Button>
         </div>
       </div>
+
+      {/* Loading Modal - Show when waiting for suggestions */}
+      {isWaitingForSuggestions && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-[#1F1D1B] rounded-2xl p-8 text-center shadow-xl">
+            <div className="h-10 w-10 mx-auto mb-4 animate-spin border-2 border-[#D4A574] border-t-transparent rounded-full" />
+            <p className="text-[#2B2826] dark:text-[#F5F3F0] font-medium">
+              กำลังเตรียมข้อมูล...
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

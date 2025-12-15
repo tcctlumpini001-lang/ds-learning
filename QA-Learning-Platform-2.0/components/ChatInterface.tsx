@@ -12,9 +12,11 @@ interface ChatInterfaceProps {
   onLogout: () => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
+  initialSuggestions?: string[];
+  initialThreadId?: string | null;
 }
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, isDarkMode, onToggleTheme }) => {
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, isDarkMode, onToggleTheme, initialSuggestions = [], initialThreadId = null }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -24,11 +26,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadMenuOpen, setIsUploadMenuOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [suggestedQueries] = useState(initialSuggestions.length > 0 ? initialSuggestions : EXAMPLE_PROMPTS);
+  const [currentSessionId, setCurrentSessionId] = useState(initialThreadId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const uploadMenuRef = useRef<HTMLDivElement>(null);
+  const dragCounter = useRef(0);
 
   const scrollToBottom = () => {
 
@@ -157,6 +163,42 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
     }
   };
 
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      setSelectedFiles(prev => [...prev, ...droppedFiles]);
+      e.dataTransfer.clearData();
+    }
+  };
+
   const sendMessage = async (text: string) => {
      if ((!text.trim() && selectedFiles.length === 0) || isTyping || isUploading) return;
 
@@ -266,19 +308,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       {/* Header */}
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FAF9F6]/90 dark:bg-[#1A1816]/90 px-6 backdrop-blur-xl">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsSidebarOpen(true)}
-            title="Chat History"
-            className="text-[#6B6662] dark:text-[#A8A29E] hover:text-[#D4A574] dark:hover:text-[#D4A574] md:inline-flex hidden transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12h18"/>
-              <path d="M3 6h18"/>
-              <path d="M3 18h18"/>
-            </svg>
-          </Button>
           <span className="font-serif font-semibold text-[#2B2826] dark:text-[#F5F3F0] text-lg tracking-wide">Learning Platform</span>
           <span className={`rounded-full px-3 py-1 text-xs font-medium ${
             isConnected
@@ -379,21 +408,30 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
                </div>
 
                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 max-w-[650px]">
-                  {EXAMPLE_PROMPTS.map((prompt, index) => (
+                  {suggestedQueries.map((prompt, index) => {
+                    // Handle both string and object formats
+                    const messageText = typeof prompt === 'string' ? prompt : (prompt as any).message;
+                    const heading = typeof prompt === 'string' ? prompt : (prompt as any).heading;
+                    const subheading = typeof prompt === 'string' ? '' : (prompt as any).subheading;
+                    
+                    return (
                     <button
                       key={index}
-                      onClick={() => sendMessage(prompt.message)}
+                      onClick={() => sendMessage(messageText)}
                       style={{ animationDelay: `${index * 0.1}s` }}
                       className="group flex flex-col items-start gap-2 rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] p-5 text-left transition-all hover:border-[#D4A574] dark:hover:border-[#D4A574] hover:shadow-sm animate-fade-in-up opacity-0"
                     >
                       <span className="font-medium text-[#2B2826] dark:text-[#F5F3F0] group-hover:text-[#D4A574] dark:group-hover:text-[#D4A574] transition-colors">
-                        {prompt.heading}
+                        {heading}
                       </span>
-                      <span className="text-sm text-[#6B6662] dark:text-[#A8A29E]">
-                        {prompt.subheading}
-                      </span>
+                      {subheading && (
+                        <span className="text-sm text-[#6B6662] dark:text-[#A8A29E]">
+                          {subheading}
+                        </span>
+                      )}
                     </button>
-                  ))}
+                    );
+                  })}
                </div>
             </div>
           ) : (
@@ -409,7 +447,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
       </main>
 
       {/* Input Area */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent dark:from-[#1A1816] dark:via-[#1A1816] pt-12 pb-8 px-6">
+      <div 
+        className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent dark:from-[#1A1816] dark:via-[#1A1816] pt-12 pb-8 px-6"
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <div className="mx-auto max-w-[720px]">
           {selectedFiles.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2">
@@ -429,7 +473,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
               ))}
             </div>
           )}
-          <div className="relative flex w-full items-end rounded-2xl border border-[#E8E6E1] dark:border-[#2F2D2B] bg-[#FFFFFF] dark:bg-[#1F1D1B] shadow-lg shadow-black/5 dark:shadow-none ring-offset-2 focus-within:ring-2 focus-within:ring-[#D4A574]/20 dark:focus-within:ring-[#D4A574]/30 transition-all">
+          <div className={`relative flex w-full items-end rounded-2xl border bg-[#FFFFFF] dark:bg-[#1F1D1B] shadow-lg shadow-black/5 dark:shadow-none ring-offset-2 transition-all ${
+            isDragging 
+              ? 'border-[#D4A574] dark:border-[#D4A574] ring-2 ring-[#D4A574]/30 dark:ring-[#D4A574]/40 bg-[#D4A574]/5 dark:bg-[#D4A574]/10' 
+              : 'border-[#E8E6E1] dark:border-[#2F2D2B] focus-within:ring-2 focus-within:ring-[#D4A574]/20 dark:focus-within:ring-[#D4A574]/30'
+          }`}>
+            {isDragging && (
+              <div className="absolute inset-0 flex items-center justify-center bg-[#D4A574]/10 dark:bg-[#D4A574]/20 rounded-2xl z-10 pointer-events-none">
+                <div className="flex flex-col items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D4A574]">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span className="text-[#D4A574] font-medium">วางไฟล์ที่นี่</span>
+                </div>
+              </div>
+            )}
             <input
               type="file"
               ref={fileInputRef}
@@ -540,20 +600,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ user, onLogout, is
         </div>
       </div>
 
-      {/* Mobile Chat History Button */}
-      <div className="md:hidden fixed bottom-24 left-6 z-30">
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setIsSidebarOpen(true)}
-          className="rounded-full shadow-lg bg-[#D4A574] hover:bg-[#8B7355] text-white"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-            <polyline points="14,2 14,8 20,8"/>
-          </svg>
-        </Button>
-      </div>
       </div>
     </div>
   );
