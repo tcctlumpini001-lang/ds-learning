@@ -1,0 +1,50 @@
+2025-12-15T08:38:53Z info: Deployment: 698e737b-7ed6-4027-bb42-885696025238
+2025-12-15T08:38:53Z info: Connecting to builder
+2025-12-15T08:38:54Z info: Builder connected
+2025-12-15T08:38:55Z info: Installing packages
+--> npm install
+
+
+up to date, audited 1 package in 613ms
+
+
+found 0 vulnerabilities
+
+2025-12-15T08:38:58Z info: Starting Build
+
+up to date, audited 1 package in 282ms
+
+
+found 0 vulnerabilities
+
+
+> ds-learning@1.0.0 build
+> cd QA-Learning-Platform-2.0 && npm run build
+
+
+
+> gemini-style-chat-ui@0.0.0 build
+> vite build
+
+
+vite v6.4.1 building for production...
+
+transforming...
+
+✓ 23 modules transformed.
+
+error during build:
+[vite]: Rollup failed to resolve import "react-markdown" from "/home/runner/workspace/QA-Learning-Platform-2.0/components/MessageBubble.tsx".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`build.rollupOptions.external`
+    at viteLog (file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46374:15)
+    at file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46432:18
+    at onwarn (file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/@vitejs/plugin-react/dist/index.js:76:7)
+    at file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46430:7
+    at onRollupLog (file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46422:5)
+    at onLog (file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:46072:7)
+    at file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/rollup/dist/es/shared/node-entry.js:20961:32
+    at Object.logger [as onLog] (file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/rollup/dist/es/shared/node-entry.js:22848:9)
+    at ModuleLoader.handleInvalidResolvedId (file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/rollup/dist/es/shared/node-entry.js:21592:26)
+    at file:///home/runner/workspace/QA-Learning-Platform-2.0/node_modules/rollup/dist/es/shared/node-entry.js:21550:26
