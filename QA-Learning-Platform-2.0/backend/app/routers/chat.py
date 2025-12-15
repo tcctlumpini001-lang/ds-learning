@@ -63,7 +63,7 @@ async def upload_file(file: UploadFile = File(...)):
     """Upload a file for the assistant"""
     try:
         content = await file.read()
-        file_id = openai_service.upload_file(content, file.filename)
+        file_id = openai_service.upload_file(content, file.filename, file.content_type)
         
         # Determine file type
         is_image = file.content_type and file.content_type.startswith("image/")

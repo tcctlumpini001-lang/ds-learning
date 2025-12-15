@@ -14,6 +14,7 @@ class OpenAIService:
         self.assistant_id = os.getenv("ASSISTANT_ID")
         if not self.assistant_id:
             raise ValueError("ASSISTANT_ID environment variable is not set")
+        self.vector_store_id = "vs_6937893e6974819181cb9f7400fd25e9"
 
     def create_thread(self, initial_messages: Optional[List[Dict[str, Any]]] = None) -> str:
         """Create a new thread, optionally with initial messages"""
@@ -60,13 +61,24 @@ class OpenAIService:
         )
         return thread_message.id
 
-    def upload_file(self, file_content: Any, filename: str) -> str:
+    def upload_file(self, file_content: Any, filename: str, mime_type: Optional[str] = None) -> str:
         """Upload a file to OpenAI"""
         # file_content should be a file-like object (bytes)
         response = self.client.files.create(
             file=(filename, file_content),
             purpose="assistants"
         )
+
+        # Add to vector store if it's not an image
+        if mime_type and not mime_type.startswith("image/"):
+            try:
+                self.client.beta.vector_stores.files.create(
+                    vector_store_id=self.vector_store_id,
+                    file_id=response.id
+                )
+            except Exception as e:
+                print(f"Error adding file to vector store: {e}")
+
         return response.id
 
 
