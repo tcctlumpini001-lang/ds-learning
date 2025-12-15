@@ -4,6 +4,7 @@ from typing import List, Optional, Dict, Any, Tuple
 import time
 from datetime import datetime
 import json
+import httpx
 
 class OpenAIService:
     def __init__(self):
@@ -34,10 +35,16 @@ class OpenAIService:
             return False
 
     def send_message(self, thread_id: str, message: str, file_ids: Optional[List[str]] = None, image_file_ids: Optional[List[str]] = None) -> str:
-        """Send a message to a thread"""
+        """
+        Send a message to a thread.
+        Note: file_ids parameter is kept for compatibility but files should be 
+        added to DemoVector via add_files_to_vector_store_batch() before sending.
+        The Assistant will search from DemoVector directly.
+        """
         # Prepare content
         content = [{"type": "text", "text": message}]
         
+        # Add images to content if provided
         if image_file_ids:
             for image_id in image_file_ids:
                 content.append({
@@ -45,42 +52,150 @@ class OpenAIService:
                     "image_file": {"file_id": image_id}
                 })
 
-        # Prepare attachments (for file search)
-        attachments = []
-        if file_ids:
-            attachments = [
-                {"file_id": file_id, "tools": [{"type": "file_search"}]}
-                for file_id in file_ids
-            ]
-            
+        # Note: We no longer use attachments for file_search
+        # Files are added to DemoVector and Assistant searches there directly
         thread_message = self.client.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
-            content=content,
-            attachments=attachments if attachments else None
+            content=content
         )
         return thread_message.id
 
     def upload_file(self, file_content: Any, filename: str, mime_type: Optional[str] = None) -> str:
-        """Upload a file to OpenAI"""
+        """
+        Upload a file to OpenAI.
+        Note: Files are NOT automatically added to vector store here.
+        Use add_files_to_vector_store_batch() after uploading to add files to DemoVector.
+        """
         # file_content should be a file-like object (bytes)
         response = self.client.files.create(
             file=(filename, file_content),
             purpose="assistants"
         )
-
-        # Add to vector store if it's not an image
-        if mime_type and not mime_type.startswith("image/"):
-            try:
-                self.client.beta.vector_stores.files.create(
-                    vector_store_id=self.vector_store_id,
-                    file_id=response.id
-                )
-            except Exception as e:
-                print(f"Error adding file to vector store: {e}")
-
         return response.id
 
+    def add_files_to_vector_store_batch(
+        self, 
+        file_ids: List[str], 
+        timeout: int = 120,
+        poll_interval: int = 2
+    ) -> Dict[str, Any]:
+        """
+        Add multiple files to the DemoVector store using OpenAI REST API.
+        Waits for batch processing to complete before returning.
+        
+        Args:
+            file_ids: List of file IDs to add to vector store
+            timeout: Maximum time to wait for batch completion (seconds)
+            poll_interval: Time between status checks (seconds)
+            
+        Returns:
+            Dict with 'success', 'batch_id', 'status', and 'failed_files' info
+        """
+        if not file_ids:
+            return {"success": True, "batch_id": None, "status": "no_files", "failed_files": 0}
+        
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            return {
+                "success": False,
+                "batch_id": None,
+                "status": "error",
+                "error_message": "OPENAI_API_KEY not set",
+                "failed_files": len(file_ids),
+                "total_files": len(file_ids)
+            }
+        
+        try:
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "OpenAI-Beta": "assistants=v2"
+            }
+            
+            # Create batch to add files to vector store using REST API
+            batch_url = f"https://api.openai.com/v1/vector_stores/{self.vector_store_id}/file_batches"
+            batch_data = {"file_ids": file_ids}
+            
+            with httpx.Client() as client:
+                batch_response = client.post(batch_url, json=batch_data, headers=headers)
+                
+                if batch_response.status_code != 200:
+                    error_detail = batch_response.text
+                    print(f"Error creating batch: {batch_response.status_code} - {error_detail}")
+                    return {
+                        "success": False,
+                        "batch_id": None,
+                        "status": "error",
+                        "error_message": error_detail,
+                        "failed_files": len(file_ids),
+                        "total_files": len(file_ids)
+                    }
+                
+                batch_data = batch_response.json()
+                batch_id = batch_data.get("id")
+                
+                # Poll for batch completion
+                start_time = time.time()
+                while time.time() - start_time < timeout:
+                    retrieve_url = f"https://api.openai.com/v1/vector_stores/{self.vector_store_id}/file_batches/{batch_id}"
+                    
+                    batch_status_response = client.get(retrieve_url, headers=headers)
+                    
+                    if batch_status_response.status_code != 200:
+                        print(f"Error retrieving batch status: {batch_status_response.status_code}")
+                        time.sleep(poll_interval)
+                        continue
+                    
+                    status_data = batch_status_response.json()
+                    status = status_data.get("status")
+                    
+                    if status == "completed":
+                        failed_count = status_data.get("file_counts", {}).get("failed", 0)
+                        if failed_count > 0:
+                            print(f"Batch {batch_id} completed with {failed_count} failed files")
+                        return {
+                            "success": True,
+                            "batch_id": batch_id,
+                            "status": status,
+                            "failed_files": failed_count,
+                            "total_files": len(file_ids)
+                        }
+                    elif status in ["failed", "cancelled"]:
+                        failed_count = status_data.get("file_counts", {}).get("failed", len(file_ids))
+                        print(f"Batch {batch_id} ended with status: {status}")
+                        return {
+                            "success": False,
+                            "batch_id": batch_id,
+                            "status": status,
+                            "failed_files": failed_count,
+                            "total_files": len(file_ids)
+                        }
+                    
+                    # Still processing (in_progress or other)
+                    time.sleep(poll_interval)
+            
+            # Timeout reached
+            print(f"Batch {batch_id} timed out after {timeout} seconds")
+            return {
+                "success": False,
+                "batch_id": batch_id,
+                "status": "timeout",
+                "failed_files": -1,
+                "total_files": len(file_ids)
+            }
+            
+        except Exception as e:
+            print(f"Error adding files to vector store batch: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                "success": False,
+                "batch_id": None,
+                "status": "error",
+                "error_message": str(e),
+                "failed_files": len(file_ids),
+                "total_files": len(file_ids)
+            }
 
     def create_and_run(self, thread_id: str) -> str:
         """Create a run for the assistant on the thread"""

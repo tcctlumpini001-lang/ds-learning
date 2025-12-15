@@ -100,16 +100,35 @@ async def send_message(request: SendMessageRequest, background_tasks: Background
         )
         session_service.add_message_to_session(session_id, user_message)
 
+        # Add files to DemoVector before sending message
+        if request.file_ids:
+            # Filter out image files (only add non-image files to vector store)
+            non_image_file_ids = []
+            for file_id in request.file_ids:
+                # If file_id exists and it's not in image_file_ids, add to batch
+                if file_id not in (request.image_file_ids or []):
+                    non_image_file_ids.append(file_id)
+            
+            # Add files to vector store in batch
+            if non_image_file_ids:
+                batch_result = openai_service.add_files_to_vector_store_batch(non_image_file_ids)
+                if not batch_result["success"]:
+                    print(f"Warning: Failed to add files to vector store: {batch_result['status']}")
+                    if batch_result.get("failed_files", 0) > 0:
+                        raise HTTPException(
+                            status_code=400, 
+                            detail=f"Failed to process {batch_result['failed_files']} file(s)"
+                        )
+
         # Send message to OpenAI thread
         openai_service.send_message(
             session.thread_id, 
             request.message, 
-            request.file_ids,
-            request.image_file_ids
+            file_ids=None,  # Don't pass file_ids as attachments anymore
+            image_file_ids=request.image_file_ids
         )
 
         # Create and run the assistant
-
         run_id = openai_service.create_and_run(session.thread_id)
 
         # Wait for completion (in production, this should be async)
